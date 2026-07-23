@@ -6,7 +6,9 @@ Reused nonce in signatures: missing nonce tracking allows signature replay.
 """
 
 import re
+
 from . import BaseRule
+
 
 class ReusedNonceRule(BaseRule):
     severity = "High"

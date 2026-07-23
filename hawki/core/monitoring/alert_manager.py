@@ -7,9 +7,9 @@ Alert manager: receives events from watchers and dispatches to handlers.
 
 import json
 import logging
-from typing import List, Dict, Any, Callable, Optional 
 from datetime import datetime
 from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 

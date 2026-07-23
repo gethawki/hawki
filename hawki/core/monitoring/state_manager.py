@@ -8,7 +8,7 @@ Persistent storage for watcher states using a JSON file.
 import json
 import logging
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ class StateManager:
         if not self.state_file.exists():
             return {}
         try:
-            with open(self.state_file, "r") as f:
+            with open(self.state_file) as f:
                 return json.load(f)
         except Exception as e:
             logger.error(f"Failed to load state file: {e}")

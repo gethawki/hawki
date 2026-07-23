@@ -6,7 +6,9 @@ Governance vote manipulation: detect voting mechanisms that can be manipulated v
 """
 
 import re
+
 from . import BaseRule
+
 
 class GovernanceVoteManipulationRule(BaseRule):
     severity = "Critical"

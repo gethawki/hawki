@@ -6,7 +6,23 @@ Blockhash as randomness source: using blockhash for randomness is insecure becau
 """
 
 import re
+
 from . import BaseRule
+
+# One combined pattern so overlapping alternatives (`block.blockhash(` used to
+# match BOTH `block\.blockhash` and `blockhash\(`) cannot double-count a single
+# occurrence. Also covers the other miner-influenced entropy sources.
+_PATTERN = re.compile(
+    r"block\.(?:blockhash|difficulty|prevrandao)\b|\bblockhash\s*\("
+)
+
+# Blank out comments while preserving offsets/line numbers.
+_COMMENT = re.compile(r"//[^\n]*|/\*.*?\*/", re.DOTALL)
+
+
+def _strip_comments(source: str) -> str:
+    return _COMMENT.sub(lambda m: re.sub(r"[^\n]", " ", m.group(0)), source)
+
 
 class BlockhashRandomnessRule(BaseRule):
     severity = "High"
@@ -19,25 +35,23 @@ class BlockhashRandomnessRule(BaseRule):
         "or other mechanisms that rely on unpredictable values."
     )
     fix_template = (
-        "Use a verifiable randomness source like Chainlink VRF, or a commit‑reveal scheme with a future blockhash "
+        "Use a verifiable randomness source like Chainlink VRF, or a commit-reveal scheme with a future blockhash "
         "that cannot be influenced by the caller."
     )
 
     def run_check(self, contract_data):
         findings = []
-        patterns = [r'block\.blockhash', r'blockhash\(']
         for contract in contract_data:
             source = contract.get("source", "")
-            for pattern in patterns:
-                matches = re.finditer(pattern, source)
-                for match in matches:
-                    line = source[:match.start()].count('\n') + 1
-                    snippet = source[match.start():match.end()]
-                    findings.append(self._create_finding(
-                        title="Insecure randomness via blockhash",
-                        file=contract.get("path", ""),
-                        line=line,
-                        vulnerable_snippet=snippet,
-                    ))
+            clean = _strip_comments(source)
+            for match in _PATTERN.finditer(clean):
+                line = clean[:match.start()].count('\n') + 1
+                snippet = clean[match.start():match.end()]
+                findings.append(self._create_finding(
+                    title="Insecure randomness via blockhash",
+                    file=contract.get("path", ""),
+                    line=line,
+                    vulnerable_snippet=snippet,
+                ))
         return findings
 # EOF

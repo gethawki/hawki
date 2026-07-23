@@ -6,19 +6,21 @@ Gas griefing: forcing a contract to use excessive gas by causing expensive opera
 """
 
 import re
+
 from . import BaseRule
+
 
 class GasGriefingRule(BaseRule):
     severity = "High"
     explanation_template = (
-        "If a contract performs operations that cost gas proportional to user‑supplied data (e.g., iterating over an array), "
+        "If a contract performs operations that cost gas proportional to user-supplied data (e.g., iterating over an array), "
         "an attacker can cause the transaction to run out of gas or cost the victim a lot of gas."
     )
     impact_template = (
         "An attacker can grief users by making their transactions fail or become extremely expensive, effectively blocking them."
     )
     fix_template = (
-        "Limit the size of loops or arrays that can be processed in a single transaction. Use pagination or off‑chain computation."
+        "Limit the size of loops or arrays that can be processed in a single transaction. Use pagination or off-chain computation."
     )
 
     def run_check(self, contract_data):

@@ -1,0 +1,5 @@
+{
+  "explanation": "block.timestamp is set by the block producer and can be nudged by several seconds. Using it as a source of randomness or as a precise deadline for high value logic lets miners or validators bias the outcome in their favor.",
+  "impact": "For lotteries, games, or auctions that key on the timestamp, a validator can slightly shift block.timestamp to win or to make a bet land favorably. Sub minute deadline checks can also be gamed.",
+  "fix_snippet": "// Do not use block.timestamp for randomness. Use a verifiable source.\nimport \"@chainlink/contracts/src/v0.8/vrf/VRFConsumerBaseV2.sol\";\n// Request randomness from Chainlink VRF and act in the callback.\n\n// If you only need coarse time gating, that is fine, but widen the\n// tolerance so a few seconds of drift cannot be exploited:\nuint256 public constant DURATION = 1 days;\nuint256 public endTime;\n\nfunction start() external {\n    endTime = block.timestamp + DURATION;\n}\n\nfunction claim() external {\n    require(block.timestamp >= endTime, \"Not ended\");\n    // ...\n}"
+}

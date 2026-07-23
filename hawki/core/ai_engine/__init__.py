@@ -3,5 +3,6 @@
 # --------------------
 """
 AI reasoning engine using LiteLLM.
-Provides dynamic prompt loading and multi‑LLM support.
+Provides dynamic prompt loading and multi-LLM support.
 """
+# EOF

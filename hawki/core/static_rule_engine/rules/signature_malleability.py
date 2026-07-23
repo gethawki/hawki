@@ -6,7 +6,9 @@ Signature malleability: using ecrecover without checking for signature malleabil
 """
 
 import re
+
 from . import BaseRule
+
 
 class SignatureMalleabilityRule(BaseRule):
     severity = "High"

@@ -8,7 +8,7 @@ Local storage for telemetry metrics.
 import json
 import logging
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ class MetricsStore:
         """Append a metrics record to the local file."""
         try:
             if self.path.exists():
-                with open(self.path, "r") as f:
+                with open(self.path) as f:
                     data = json.load(f)
             else:
                 data = []
@@ -45,7 +45,7 @@ class MetricsStore:
         """Retrieve all stored metrics."""
         try:
             if self.path.exists():
-                with open(self.path, "r") as f:
+                with open(self.path) as f:
                     return json.load(f)
             else:
                 return []
@@ -60,3 +60,4 @@ class MetricsStore:
                 self.path.unlink()
         except OSError as e:
             logger.warning(f"Failed to clear metrics: {e}")
+# EOF

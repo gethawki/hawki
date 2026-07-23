@@ -2,12 +2,30 @@
 # File: hawki/core/static_rule_engine/rules/upgrade_admin.py
 # --------------------
 """
-UpgradeAdmin – Detects improper upgrade admin transfer mechanisms.
+UpgradeAdmin - Detects improper upgrade admin transfer mechanisms.
 If the admin of an upgradeable proxy can be changed by anyone without access control,
 an attacker could take over the contract.
+
+Uses the shared source-text guard detection from ``access_control_bypass``:
+the parser does not surface modifier invocations, so a function is only
+reported when neither its parsed modifiers nor its extracted source text
+show an access-control guard.
 """
 
+import re
+
 from . import BaseRule
+from .access_control_bypass import (
+    has_guard_modifier,
+    has_guard_text,
+    iter_functions,
+    unguarded_occurrence,
+)
+
+# Matches an assignment to a bare `admin` variable (not `pendingAdmin =`,
+# not `admin ==` comparisons).
+_ADMIN_ASSIGN_RE = re.compile(r"(?<![\w$])admin\s*=(?!=)")
+
 
 class UpgradeAdminRule(BaseRule):
     severity = "Medium"
@@ -31,34 +49,55 @@ class UpgradeAdminRule(BaseRule):
         "```"
     )
 
+    _ADMIN_CHANGE_NAMES = ("changeadmin", "setadmin", "updateadmin", "transferownership")
+
     def run_check(self, contract_data):
         findings = []
+        seen = set()
         for contract in contract_data:
-            for func in contract.get("functions", []):
+            source = contract.get("source", "")
+            path = contract.get("path", "")
+            for func, contract_name in iter_functions(contract):
                 func_name = func.get("name", "")
-                body = func.get("body", "")
-                # If function name suggests admin change and has no access control
-                if any(k in func_name.lower() for k in ["changeadmin", "setadmin", "updateadmin", "transferownership"]):
-                    # Check if it has modifiers like onlyOwner
-                    modifiers = func.get("modifiers", [])
-                    if not any(mod in ["onlyOwner", "onlyAdmin", "onlyGovernance"] for mod in modifiers):
-                        line = func.get("line", 1)
-                        snippet = f"function {func_name}(...)"
+                lowered = func_name.lower()
+                # Constructors (old-style: function named after the contract)
+                # legitimately set the admin.
+                if contract_name and lowered == contract_name.lower():
+                    continue
+                if func.get("visibility") in ("internal", "private"):
+                    continue
+                key = (path, func_name)
+                if key in seen:
+                    continue
+                # Admin-change function without access control.
+                if any(k in lowered for k in self._ADMIN_CHANGE_NAMES):
+                    occ = unguarded_occurrence(func, source)
+                    if occ is not None:
+                        seen.add(key)
                         findings.append(self._create_finding(
                             title="Unprotected upgrade admin change",
-                            file=contract.get("path", ""),
-                            line=line,
-                            vulnerable_snippet=snippet,
+                            file=path,
+                            line=occ["line"],
+                            vulnerable_snippet=f"function {func_name}(...)",
                         ))
-                # Also look for assignments to admin variable without checks
-                if "admin =" in body and "require" not in body and "modifier" not in body:
-                    line = func.get("line", 1)
-                    snippet = f"function {func_name}() ... // contains admin ="
-                    findings.append(self._create_finding(
-                        title="Admin variable assignment without access control",
-                        file=contract.get("path", ""),
-                        line=line,
-                        vulnerable_snippet=snippet,
-                    ))
+                        continue
+                # Assignment to the admin variable without any check.
+                if has_guard_modifier(func.get("modifiers")):
+                    continue
+                occ = unguarded_occurrence(func, source)
+                if occ is None:
+                    continue
+                text = occ["text"] + "\n" + (func.get("body") or "")
+                if not _ADMIN_ASSIGN_RE.search(text):
+                    continue
+                if "require" in text or "modifier" in text or has_guard_text(text):
+                    continue
+                seen.add(key)
+                findings.append(self._create_finding(
+                    title="Admin variable assignment without access control",
+                    file=path,
+                    line=occ["line"],
+                    vulnerable_snippet=f"function {func_name}() ... // contains admin =",
+                ))
         return findings
 # EOF

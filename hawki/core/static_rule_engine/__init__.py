@@ -2,18 +2,18 @@
 # File: hawki/core/static_rule_engine/__init__.py (updated)
 # --------------------
 """
-Static rule engine that auto‑discovers rule classes from the rules/ directory.
+Static rule engine that auto-discovers rule classes from the rules/ directory.
 Now integrates with Remediation Engine to enrich findings with fix snippets.
 """
 
 import importlib
-import pkgutil
 import logging
+import pkgutil
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 
-from .rules import BaseRule
 from ..remediation_engine import RemediationEngine
+from .rules import BaseRule
 
 logger = logging.getLogger(__name__)
 

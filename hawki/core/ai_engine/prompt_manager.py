@@ -9,7 +9,7 @@ Supports dynamic discovery of new templates.
 import json
 import logging
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ class PromptManager:
 
         for json_file in self.templates_dir.glob("*.json"):
             try:
-                with open(json_file, "r", encoding="utf-8") as f:
+                with open(json_file, encoding="utf-8") as f:
                     template = json.load(f)
                 # Validate minimal structure
                 if "system" in template and "user" in template:

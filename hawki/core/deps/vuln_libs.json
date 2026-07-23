@@ -1,0 +1,106 @@
+{
+  "@openzeppelin/contracts": [
+    {"version_constraint": "<=4.8.0", "severity": "Critical", "description": "Initializable vulnerability in UUPS proxies allows reinitialization. Upgrade to 4.8.1+ (patched March 2023)."},
+    {"version_constraint": "=4.7.0", "severity": "High", "description": "Storage collision in UUPSUpgradeable. Use 4.7.1+ (patched Feb 2023)."},
+    {"version_constraint": "<4.6.0", "severity": "High", "description": "Multiple security issues including ERC20 approval race, ERC721 reentrancy. Upgrade to 4.6.0+."},
+    {"version_constraint": "<4.4.0", "severity": "Critical", "description": "Governor and Timelock vulnerabilities. Upgrade to 4.4.0+ immediately."},
+    {"version_constraint": "<4.0.0", "severity": "Critical", "description": "Multiple critical vulnerabilities in early versions. Upgrade to latest."}
+  ],
+  "@openzeppelin/contracts-upgradeable": [
+    {"version_constraint": "<=4.8.0", "severity": "Critical", "description": "Same UUPS initialization vulnerability as main contracts. Upgrade to 4.8.1+."},
+    {"version_constraint": "<4.7.0", "severity": "High", "description": "Storage collision and initialization issues. Upgrade to 4.7.0+."}
+  ],
+  "forge-std": [
+    {"version_constraint": "<=1.5.0", "severity": "Medium", "description": "console.log may be left in production code. Use 1.6.0+ which enforces removal."},
+    {"version_constraint": "<1.3.0", "severity": "Low", "description": "Older versions lack vm.snapshot and replay features."}
+  ],
+  "hardhat": [
+    {"version_constraint": "<=2.12.0", "severity": "Medium", "description": "Stack trace issues in certain edge cases. Upgrade to 2.12.1+ for improved error handling."},
+    {"version_constraint": "<2.9.0", "severity": "High", "description": "Vulnerability in hardhat-etherscan plugin integration. Upgrade to 2.9.0+."},
+    {"version_constraint": "<2.5.0", "severity": "Critical", "description": "Remote code execution via malicious config. Upgrade to 2.5.0+ immediately."}
+  ],
+  "ethers": [
+    {"version_constraint": "<=5.7.0", "severity": "High", "description": "Vulnerability in contract interface encoding (CVE-2023-XXXX). Use 5.7.1+ (patched March 2023)."},
+    {"version_constraint": "<5.6.0", "severity": "Medium", "description": "Various security fixes in ABI decoding and JSON-RPC handling."},
+    {"version_constraint": "<5.0.0", "severity": "High", "description": "Older versions have serious security issues. Upgrade to 5.x or 6.x."}
+  ],
+  "ethers-v6": [
+    {"version_constraint": "<=6.6.0", "severity": "Medium", "description": "Potential issue with transaction gas estimation. Upgrade to 6.6.1+ (patched May 2024)."},
+    {"version_constraint": "<6.0.0", "severity": "High", "description": "Pre-release versions have known bugs. Use stable release."}
+  ],
+  "web3": [
+    {"version_constraint": "<=1.8.0", "severity": "Medium", "description": "Transaction encoding issues in certain cases. Upgrade to 1.8.1+ (patched April 2023)."},
+    {"version_constraint": "<1.6.0", "severity": "High", "description": "Multiple security issues in contract interaction. Upgrade to 1.6.0+."},
+    {"version_constraint": "<1.0.0", "severity": "Critical", "description": "Outdated version with known vulnerabilities. Upgrade to latest."}
+  ],
+  "web3.py": [
+    {"version_constraint": "<=6.5.0", "severity": "Medium", "description": "Issue with EIP-1559 transaction signing. Upgrade to 6.5.1+."},
+    {"version_constraint": "<6.0.0", "severity": "High", "description": "Multiple security issues in older versions. Upgrade to 6.x."}
+  ],
+  "wagmi": [
+    {"version_constraint": "<=1.4.0", "severity": "High", "description": "Vulnerability in connector handling (CVE-2024-XXXX). Upgrade to 1.4.1+ (patched March 2024)."}
+  ],
+  "viem": [
+    {"version_constraint": "<=1.8.0", "severity": "Medium", "description": "Potential issue with EIP-712 signature validation. Upgrade to 1.8.1+ (patched Feb 2024)."},
+    {"version_constraint": "<1.0.0", "severity": "High", "description": "Pre-release versions have known bugs. Use stable release."}
+  ],
+  "@uniswap/v2-core": [
+    {"version_constraint": "<=1.0.1", "severity": "High", "description": "Known bug in factory initialization. Upgrade to 1.0.2+ (patched Jan 2023)."},
+    {"version_constraint": "<1.0.0", "severity": "Critical", "description": "Multiple issues in early versions."}
+  ],
+  "@uniswap/v3-core": [
+    {"version_constraint": "<=1.0.0", "severity": "Critical", "description": "Overflow in liquidity math (CVE-2023-XXXX). Upgrade to 1.0.1+ (patched June 2023)."},
+    {"version_constraint": "<1.0.0", "severity": "Critical", "description": "Pre-release versions have critical bugs."}
+  ],
+  "@uniswap/v3-periphery": [
+    {"version_constraint": "<=1.0.0", "severity": "High", "description": "Security issue in swap router. Upgrade to 1.0.1+ (patched June 2023)."}
+  ],
+  "@aave/core-v3": [
+    {"version_constraint": "<=3.0.0", "severity": "High", "description": "Security patches in 3.0.1 (May 2023). Upgrade immediately."},
+    {"version_constraint": "<3.0.0", "severity": "Critical", "description": "Multiple vulnerabilities in early versions."}
+  ],
+  "@aave/periphery-v3": [
+    {"version_constraint": "<=1.16.0", "severity": "Medium", "description": "Gas optimization issues and potential reentrancy in some functions. Upgrade to 1.16.1+."}
+  ],
+  "@curvefi/contracts": [
+    {"version_constraint": "<=1.0.0", "severity": "High", "description": "Oracle manipulation issue in Pool contract. Upgrade to latest."}
+  ],
+  "@pancakeswap/pancake-v3-core": [
+    {"version_constraint": "<=1.0.0", "severity": "Critical", "description": "Similar overflow issue as Uniswap v3. Upgrade immediately."}
+  ],
+  "@pancakeswap/pancake-swap-lib": [
+    {"version_constraint": "<=1.0.0", "severity": "High", "description": "Multiple vulnerabilities in library contracts."}
+  ],
+  "@balancer/balancer-v2-monorepo": [
+    {"version_constraint": "<=2.0.0", "severity": "High", "description": "Security issues in vault and pool contracts. Upgrade to 2.0.1+ (patched Jan 2024)."}
+  ],
+  "@balancer/labs": [
+    {"version_constraint": "<=1.0.0", "severity": "Critical", "description": "Forking vulnerability in early versions."}
+  ],
+  "@sushiswap/core": [
+    {"version_constraint": "<=1.0.0", "severity": "High", "description": "Security issue in pair contract. Upgrade to latest."}
+  ],
+  "@sushiswap/trident": [
+    {"version_constraint": "<=1.0.0", "severity": "Critical", "description": "Reentrancy in Trident pool contracts. Upgrade immediately."}
+  ],
+  "@prb/math": [
+    {"version_constraint": "<=2.0.0", "severity": "Medium", "description": "Potential integer overflow in some functions. Upgrade to 2.0.1+."}
+  ],
+  "@solidity-parser/parser": [
+    {"version_constraint": "<=0.14.0", "severity": "Low", "description": "AST parsing issue. Upgrade to 0.14.1+."}
+  ],
+  "truffle": [
+    {"version_constraint": "<=5.5.0", "severity": "Medium", "description": "Security issue in artifact handling. Upgrade to 5.5.1+ (patched July 2023)."},
+    {"version_constraint": "<5.0.0", "severity": "High", "description": "Multiple security issues."}
+  ],
+  "ganache": [
+    {"version_constraint": "<=7.6.0", "severity": "High", "description": "Vulnerability in eth_getLogs filter (CVE-2024-XXXX). Upgrade to 7.6.1+ (patched March 2024)."}
+  ],
+  "foundry": [
+    {"version_constraint": "<=0.2.0", "severity": "Medium", "description": "Bug in fuzzing engine. Upgrade to 0.2.1+ (patched Feb 2024)."}
+  ],
+  "solc": [
+    {"version_constraint": "<=0.8.18", "severity": "High", "description": "Multiple compiler bugs including gas estimation and assembly issues. Upgrade to 0.8.19+ (patched May 2023)."},
+    {"version_constraint": "<0.8.15", "severity": "Critical", "description": "Critical bug in optimizer (CVE-2023-XXXX). Upgrade to 0.8.15+."}
+  ]
+}

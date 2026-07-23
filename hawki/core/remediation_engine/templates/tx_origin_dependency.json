@@ -1,0 +1,5 @@
+{
+  "explanation": "tx.origin is the account that started the whole transaction chain, not the immediate caller. Using it for authorization means a malicious contract can trick an authorized user into calling it, and it will then call your contract with tx.origin still equal to the trusted user.",
+  "impact": "A phishing contract can drain a victim's funds or invoke privileged actions simply by getting the victim to call any function on the attacker's contract. Authorization is effectively bypassed.",
+  "fix_snippet": "// Authorize on msg.sender, never tx.origin.\naddress public owner;\n\nmodifier onlyOwner() {\n    require(msg.sender == owner, \"Not owner\");\n    _;\n}\n\nfunction withdraw() external onlyOwner {\n    // msg.sender is the direct caller, so an intermediary\n    // phishing contract cannot pass this check on the owner's behalf.\n}"
+}

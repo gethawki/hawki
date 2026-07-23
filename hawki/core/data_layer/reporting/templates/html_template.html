@@ -2,80 +2,103 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Hawk‑i Audit Report</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hawk-i Audit Report</title>
     <style>
+        :root {
+            --steel: #687F97;
+            --ink: #0c0c0c;
+            --panel: #151515;
+            --panel-2: #1e1e1e;
+            --border: #2a2a2a;
+            --text: #e5e5e5;
+            --muted: #9aa4ad;
+        }
         body {
-            background-color: #0c0c0c;
-            color: #e5e5e5;
-            font-family: 'Inter', sans-serif;
-            margin: 2rem;
+            background-color: var(--ink);
+            color: var(--text);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 2rem;
+            line-height: 1.6;
         }
-        h1, h2, h3 {
-            color: #687F97;
-        }
+        h1, h2, h3, h4 { color: var(--steel); }
+        h1 { margin-top: 0; }
+        a { color: var(--steel); }
         pre {
-            background-color: #1e1e1e;
+            background-color: var(--panel-2);
             padding: 1rem;
             border-radius: 0.5rem;
-            border-left: 4px solid #687F97;
+            border-left: 4px solid var(--steel);
             overflow-x: auto;
         }
-        code {
-            font-family: 'Fira Code', monospace;
-            color: #d4d4d4;
-        }
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            margin: 1rem 0;
-        }
-        th, td {
-            border: 1px solid #2a2a2a;
-            padding: 0.5rem;
-            text-align: left;
-        }
-        th {
-            background-color: #1e1e1e;
-            color: #687F97;
-        }
+        code { font-family: 'Fira Code', ui-monospace, monospace; color: #d4d4d4; }
+        table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+        th, td { border: 1px solid var(--border); padding: 0.5rem; text-align: left; }
+        th { background-color: var(--panel-2); color: var(--steel); }
         .summary-box {
-            background-color: #151515;
-            border: 1px solid #2a2a2a;
+            background-color: var(--panel);
+            border: 1px solid var(--border);
             border-radius: 1rem;
             padding: 1.5rem;
             margin-bottom: 2rem;
         }
-        .score {
-            font-size: 2rem;
-            font-weight: bold;
-        }
+        .score { font-size: 2rem; font-weight: bold; }
         .score.secure { color: #4CAF50; }
-        .score.minor { color: #8BC34A; }
-        .score.moderate { color: #FFC107; }
-        .score.high { color: #FF9800; }
-        .score.critical { color: #F44336; }
-        img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 0.5rem;
+        .score.minor-risk { color: #8BC34A; }
+        .score.moderate-risk { color: #FFC107; }
+        .score.high-risk { color: #FF9800; }
+        .score.critical-risk { color: #F44336; }
+        img { max-width: 100%; height: auto; border-radius: 0.5rem; }
+
+        .finding {
+            background-color: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1.5rem;
         }
+        .finding h3 { margin-top: 0; }
+        .finding .label {
+            color: var(--muted);
+            text-transform: uppercase;
+            font-size: 0.72rem;
+            letter-spacing: 0.06em;
+            margin: 1rem 0 0.25rem;
+            font-weight: 600;
+        }
+        .loc { font-family: 'Fira Code', ui-monospace, monospace; color: var(--text); }
+        .badge {
+            display: inline-block;
+            padding: 0.15rem 0.6rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            vertical-align: middle;
+        }
+        .badge.critical { background: #F44336; color: #fff; }
+        .badge.high { background: #FF9800; color: #1a1a1a; }
+        .badge.medium { background: #FFC107; color: #1a1a1a; }
+        .badge.low { background: #8BC34A; color: #1a1a1a; }
+        .badge.info { background: #687F97; color: #fff; }
     </style>
 </head>
 <body>
-    <h1>🦅 Hawk‑i Audit Report</h1>
+    <h1>Hawk-i Audit Report</h1>
     <p><strong>Generated:</strong> {{ generated_at }}</p>
 
     <div class="summary-box">
-        <h2>📊 Executive Summary</h2>
+        <h2>Executive Summary</h2>
         <ul>
             <li><strong>Mode:</strong> {{ scan_metadata.mode }} (AI: {{ scan_metadata.ai_enabled }}, Sandbox: {{ scan_metadata.sandbox_enabled }})</li>
             <li><strong>Repository:</strong> {{ repo_data.path }} ({{ repo_data.type }})</li>
             <li><strong>Contracts Scanned:</strong> {{ scan_metadata.total_scanned_contracts }}</li>
             <li><strong>Files Analyzed:</strong> {{ scan_metadata.total_files }}</li>
             <li><strong>Total Findings:</strong> {{ total_findings }}</li>
-            <li><strong>Severity Breakdown:</strong> Critical: {{ severity_counts.Critical or 0 }}, High: {{ severity_counts.High or 0 }}, Medium: {{ severity_counts.Medium or 0 }}, Low: {{ severity_counts.Low or 0 }}</li>
+            <li><strong>Severity Breakdown:</strong> Critical: {{ severity_counts.Critical or 0 }}, High: {{ severity_counts.High or 0 }}, Medium: {{ severity_counts.Medium or 0 }}, Low: {{ severity_counts.Low or 0 }}, Info: {{ severity_counts.Info or 0 }}</li>
             <li><strong>Simulation Success Rate:</strong> {{ simulation_success_rate or "N/A" }}</li>
-            <li><strong>Security Score:</strong> <span class="score {{ score.classification.lower().replace(' ', '-') }}">{{ score.score }}/100 – {{ score.classification }}</span></li>
+            <li><strong>Security Score:</strong> <span class="score {{ score.classification.lower().replace(' ', '-') }}">{{ score.score }}/100 ({{ score.classification }})</span></li>
         </ul>
         {% if not scan_metadata.ai_enabled %}
         <p><em>AI reasoning was not enabled during this scan.</em></p>
@@ -85,7 +108,7 @@
         {% endif %}
     </div>
 
-    <h2>📈 Vulnerability Breakdown</h2>
+    <h2>Vulnerability Breakdown</h2>
     <h3>Severity Distribution</h3>
     {% if 'severity_pie.png' in chart_paths %}
     <img src="charts/severity_pie.png" alt="Severity Pie Chart">
@@ -102,56 +125,150 @@
 
     <h3>Severity Table</h3>
     <table>
-        <tr><th>Severity</th><th>Count</th></tr>
-        <tr><td>Critical</td><td>{{ severity_counts.Critical or 0 }}</td></tr>
-        <tr><td>High</td><td>{{ severity_counts.High or 0 }}</td></tr>
-        <tr><td>Medium</td><td>{{ severity_counts.Medium or 0 }}</td></tr>
-        <tr><td>Low</td><td>{{ severity_counts.Low or 0 }}</td></tr>
+        <thead><tr><th>Severity</th><th>Count</th></tr></thead>
+        <tbody>
+            <tr><td>Critical</td><td>{{ severity_counts.Critical or 0 }}</td></tr>
+            <tr><td>High</td><td>{{ severity_counts.High or 0 }}</td></tr>
+            <tr><td>Medium</td><td>{{ severity_counts.Medium or 0 }}</td></tr>
+            <tr><td>Low</td><td>{{ severity_counts.Low or 0 }}</td></tr>
+            <tr><td>Info</td><td>{{ severity_counts.Info or 0 }}</td></tr>
+        </tbody>
     </table>
 
-    <h2>🔍 Detailed Findings</h2>
+    <h2>Detailed Findings</h2>
+    <p>Each finding shows where the flaw is, the code responsible, why it is
+    dangerous, its impact, and a concrete fix.</p>
+
     {% for f in findings %}
-    <div style="margin-bottom: 3rem;">
-        <h3>{{ f.id }}: {{ f.title }} ({{ f.severity }})</h3>
-        <p><strong>File:</strong> {{ f.file }}:{{ f.line }}</p>
-        <p><strong>Vulnerable Code:</strong></p>
+    <div class="finding">
+        <h3>{{ f.id }}: {{ f.title }} <span class="badge {{ f.severity_class }}">{{ f.severity }}</span></h3>
+        <p><strong>Location:</strong> <span class="loc">{{ f.file }}:{{ f.line }}</span>
+        {% if f.function_name %}&nbsp;|&nbsp; <strong>Function:</strong> <span class="loc">{{ f.function_name }}</span>{% endif %}</p>
+
+        <div class="label">Vulnerable code</div>
         <pre><code>{{ f.vulnerable_snippet }}</code></pre>
-        <p><strong>Recommended Fix:</strong></p>
+
+        <div class="label">What is wrong</div>
+        <p>{{ f.explanation }}</p>
+
+        <div class="label">Impact</div>
+        <p>{{ f.impact }}</p>
+
+        <div class="label">Recommended fix</div>
         <pre><code>{{ f.fix_snippet }}</code></pre>
-        <p><strong>Explanation:</strong> {{ f.explanation }}</p>
-        <p><strong>Impact:</strong> {{ f.impact }}</p>
+
         {% if f.exploit_steps %}
-        <p><strong>Exploit Reproduction Steps:</strong></p>
+        <div class="label">Exploit reproduction steps</div>
         <ol>
             {% for step in f.exploit_steps %}
             <li>{{ step }}</li>
             {% endfor %}
         </ol>
         {% endif %}
-        <hr>
     </div>
     {% endfor %}
 
-    <h2>🧪 Simulation Metrics</h2>
+    <h2>Simulation Metrics</h2>
     <p><strong>Success Rate:</strong> {{ simulation_success_rate or "N/A" }}</p>
     <p><strong>Total Exploits Attempted:</strong> {{ repo_data.sandbox_results | length if repo_data.sandbox_results else 0 }}</p>
     {% if repo_data.sandbox_results %}
     <table>
-        <tr><th>Attack</th><th>Success</th><th>Before</th><th>After</th><th>Gas Used</th><th>Tx Hash</th></tr>
+        <thead><tr><th>Attack</th><th>Success</th><th>Before</th><th>After</th><th>Gas Used</th><th>Tx Hash</th></tr></thead>
+        <tbody>
         {% for res in repo_data.sandbox_results %}
         <tr>
             <td>{{ res.attack_name }}</td>
-            <td>{{ res.success }}</td2021>
+            <td>{{ res.success }}</td>
             <td>{{ res.before_balance }}</td>
             <td>{{ res.after_balance }}</td>
             <td>{{ res.gas_used }}</td>
             <td>{{ res.transaction_hash }}</td>
         </tr>
         {% endfor %}
+        </tbody>
     </table>
     {% endif %}
 
+    <h2>Additional Security Modules</h2>
+
+    <h3>Bytecode Verification</h3>
+    {% if bytecode_result %}
+    <p><strong>Match:</strong> {{ bytecode_result.match }}</p>
+    <p><strong>Onchain Hash:</strong> {{ bytecode_result.onchain_hash }}</p>
+    <p><strong>Compiled Hash:</strong> {{ bytecode_result.compiled_hash }}</p>
+    <p><strong>Summary:</strong> {{ bytecode_result.diff_summary }}</p>
+    {% else %}
+    <p>Not performed.</p>
+    {% endif %}
+
+    <h3>Dependency Vulnerabilities</h3>
+    {% if dependency_findings %}
+    <table>
+        <thead><tr><th>Package</th><th>Installed</th><th>Vulnerable Versions</th><th>Severity</th></tr></thead>
+        <tbody>
+        {% for dep in dependency_findings %}
+        <tr><td>{{ dep.package }}</td><td>{{ dep.installed_version }}</td><td>{{ dep.vulnerable_versions }}</td><td>{{ dep.severity }}</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No vulnerable dependencies found or scan not run.</p>
+    {% endif %}
+
+    <h3>Upgrade Safety</h3>
+    {% if upgrade_findings %}
+    <table>
+        <thead><tr><th>File</th><th>Title</th><th>Severity</th></tr></thead>
+        <tbody>
+        {% for u in upgrade_findings %}
+        <tr><td>{{ u.file }}</td><td>{{ u.title }}</td><td>{{ u.severity }}</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No upgrade safety issues detected.</p>
+    {% endif %}
+
+    <h3>Formal Verification</h3>
+    {% if formal_findings %}
+    <table>
+        <thead><tr><th>Title</th><th>Severity</th><th>Description</th></tr></thead>
+        <tbody>
+        {% for fv in formal_findings %}
+        <tr><td>{{ fv.title }}</td><td>{{ fv.severity }}</td><td>{{ fv.description }}</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No formal verification issues found or not run.</p>
+    {% endif %}
+
+    <h3>Hawk-i Deep Agent Campaign</h3>
+    {% if deep_agent_stats %}
+    <ul>
+        <li>Total attempts: {{ deep_agent_stats.total_attempts }}</li>
+        <li>Successful: {{ deep_agent_stats.successful }}</li>
+        <li>Rule attempts: {{ deep_agent_stats.rule_attempts }}</li>
+        <li>Novel attempts: {{ deep_agent_stats.novel_attempts }}</li>
+        <li>Novel successes: {{ deep_agent_stats.novel_successes }}</li>
+    </ul>
+    {% if 'deep_outcomes.png' in chart_paths %}
+    <img src="charts/deep_outcomes.png" alt="Deep Agent Outcomes">
+    {% endif %}
+    {% if 'deep_novel_split.png' in chart_paths %}
+    <img src="charts/deep_novel_split.png" alt="Novel Attack Split">
+    {% endif %}
+    <h4>Attack Timeline</h4>
+    <ul>
+        {% for event in deep_agent_timeline %}
+        <li>{{ event.timestamp }}: {{ event.type }} attack "{{ event.name }}" success={{ event.success }}</li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>Deep agent not run.</p>
+    {% endif %}
+
     <hr>
-    <p><em>Report generated by Hawk‑i v0.7.0</em></p>
+    <p><em>Report generated by Hawk-i v1.0.0</em></p>
 </body>
 </html>

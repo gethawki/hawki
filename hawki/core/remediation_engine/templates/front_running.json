@@ -1,0 +1,5 @@
+{
+  "explanation": "Transactions sit in the public mempool before they are mined, so anyone can observe a pending transaction and submit their own with a higher gas price to be included first. Functions whose outcome depends on ordering (trades, auctions, claims) can be front run or sandwiched.",
+  "impact": "Attackers extract value (MEV) by front running swaps to move the price against the victim, back running to capture arbitrage, or sandwiching to profit from slippage. Users receive worse prices or lose their claim entirely.",
+  "fix_snippet": "// Add slippage protection and, where ordering matters, commit reveal.\nfunction swap(uint amountIn, uint minAmountOut, uint deadline) external {\n    require(block.timestamp <= deadline, \"Expired\");\n    uint amountOut = _swap(amountIn);\n    require(amountOut >= minAmountOut, \"Slippage exceeded\");\n}\n\n// Commit reveal for order sensitive actions:\n// 1. commit(keccak256(abi.encode(value, salt)))\n// 2. later reveal(value, salt) and verify the stored hash.\n// Consider private mempools or batch auctions to remove ordering advantage."
+}

@@ -5,7 +5,10 @@
 Uninitialized storage pointers: detect local storage variables that point to default slot 0.
 """
 
+import re
+
 from . import BaseRule
+
 
 class UninitializedStorageRule(BaseRule):
     severity = "High"
@@ -23,20 +26,23 @@ class UninitializedStorageRule(BaseRule):
 
     def run_check(self, contract_data):
         findings = []
-        # Look for " storage " keyword without " = "
-        import re
-        pattern = re.compile(r'(\w+)\s+storage\s+(\w+)\s*(?!=)')
+        # A genuinely uninitialized storage pointer is a LOCAL declaration that
+        # is terminated (`;`) with no assignment, e.g. `User storage user;`.
+        # The common, SAFE pattern `User storage user = map[key];` assigns the
+        # pointer and must not be flagged, so the match requires the declaration
+        # to end at `;` and explicitly excludes an `=` before it. `storage` used
+        # as a function-parameter data location ends at `,`/`)` and is likewise
+        # excluded.
+        pattern = re.compile(r"\b[A-Za-z_]\w*\s+storage\s+[A-Za-z_]\w*\s*;")
         for contract in contract_data:
             source = contract.get("source", "")
-            matches = pattern.finditer(source)
-            for match in matches:
-                line = source[:match.start()].count('\n') + 1
-                snippet = source[match.start():match.end()]
+            for match in pattern.finditer(source):
+                line = source[:match.start()].count("\n") + 1
                 findings.append(self._create_finding(
                     title="Uninitialized storage pointer",
                     file=contract.get("path", ""),
                     line=line,
-                    vulnerable_snippet=snippet,
+                    vulnerable_snippet=match.group(0).strip(),
                 ))
         return findings
 # EOF: hawki/core/static_rule_engine/rules/uninitialized_storage.py

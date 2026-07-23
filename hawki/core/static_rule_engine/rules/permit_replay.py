@@ -2,23 +2,25 @@
 # File: hawki/core/static_rule_engine/rules/permit_replay.py
 # --------------------
 """
-Permit signature replay: detect missing nonce/replay protection in EIP‑2612 permit.
+Permit signature replay: detect missing nonce/replay protection in EIP-2612 permit.
 """
 
 import re
+
 from . import BaseRule
+
 
 class PermitReplayRule(BaseRule):
     severity = "Critical"
     explanation_template = (
-        "EIP‑2612 `permit` functions must include a nonce to prevent signature replay across chains or after the permit is used. "
+        "EIP-2612 `permit` functions must include a nonce to prevent signature replay across chains or after the permit is used. "
         "Without proper nonce tracking, the same signature can be reused multiple times."
     )
     impact_template = (
         "An attacker can replay a permit signature to spend tokens multiple times, draining user funds."
     )
     fix_template = (
-        "Implement a nonce mapping and increment it after each use, as specified in EIP‑2612."
+        "Implement a nonce mapping and increment it after each use, as specified in EIP-2612."
     )
 
     def run_check(self, contract_data):

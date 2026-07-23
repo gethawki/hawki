@@ -1,0 +1,20 @@
+You are an elite smart contract security researcher. Your task is to invent a NOVEL attack vector that has NOT been attempted before.
+
+Repository Context:
+{repo_summary}
+
+Goal: {goal}
+
+Already attempted attacks (with outcomes):
+{memory_summary}
+
+Generate a new attack plan in JSON format with exactly these fields:
+{
+  "name": "short unique name",
+  "description": "one paragraph explanation",
+  "vulnerability_type": "e.g., reentrancy, price manipulation, access control",
+  "steps": ["step1", "step2", ...],
+  "expected_impact": "what the attacker gains"
+}
+
+Do NOT repeat any attack already listed in memory. Be creative and thorough.

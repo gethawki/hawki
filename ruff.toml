@@ -1,0 +1,40 @@
+# Ruff configuration for hawki.
+#
+# Captures sensible, explicit defaults so a repo-wide `ruff check` runs
+# deterministically regardless of the installed ruff version. The selected
+# rule set is intentionally close to ruff's defaults (pyflakes + a subset of
+# pycodestyle) plus a few import-hygiene checks, so the existing codebase can
+# be brought clean incrementally without a large one-shot churn.
+
+line-length = 120
+target-version = "py39"
+
+# Directories that are generated, vendored, or not part of the shipped package.
+extend-exclude = [
+    ".venv",
+    "build",
+    "dist",
+    "demo",
+    "__pycache__",
+]
+
+[lint]
+# E/W: pycodestyle, F: pyflakes, I: isort, UP: pyupgrade, B: flake8-bugbear.
+select = ["E", "F", "I", "UP", "B"]
+ignore = [
+    "E501",  # line length is enforced by the formatter, not the linter
+    "E741",  # ambiguous variable names (e.g. single-letter loop vars) are used intentionally
+    "B008",  # function calls in argument defaults appear in some CLI signatures
+    "UP006", # keep typing.List/Dict style: annotations are evaluated at runtime (pydantic) on the py3.9 target
+    "UP035", # same reason: do not rewrite deprecated typing imports while supporting py3.9 runtime annotations
+]
+
+[lint.per-file-ignores]
+# Tests may shadow names and use assert-style helpers freely.
+"tests/**" = ["F811", "E402"]
+# Package __init__ files re-export symbols.
+"**/__init__.py" = ["F401"]
+
+[format]
+quote-style = "double"
+indent-style = "space"

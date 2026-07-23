@@ -8,7 +8,8 @@ Produces findings in the same format as static rules.
 
 import json
 import logging
-from typing import List, Dict, Any, Optional
+import re
+from typing import Any, Dict, List, Optional
 
 from .llm_orchestrator import LLMOrchestrator
 
@@ -41,9 +42,71 @@ class ReasoningAgent:
                 **context,
             )
             if result:
-                # Expect result to contain a list of findings under a "findings" key
-                ai_findings = result.get("findings", [])
+                # Models are inconsistent: some return {"findings": [...]},
+                # some {"vulnerabilities": [...]}, some a bare list, some a
+                # single finding dict. Normalise all of these to a list.
+                if isinstance(result, list):
+                    ai_findings = result
+                elif isinstance(result, dict):
+                    ai_findings = (
+                        result.get("findings")
+                        or result.get("vulnerabilities")
+                        or []
+                    )
+                    # A single finding returned as a bare dict.
+                    if not ai_findings and ("title" in result or "severity" in result):
+                        ai_findings = [result]
+                else:
+                    ai_findings = []
+
                 for f in ai_findings:
+                    if isinstance(f, str):
+                        f = {"title": f}
+                    if not isinstance(f, dict):
+                        continue
+                    # Models label fields inconsistently. Map common aliases to
+                    # the standard finding schema before filling defaults.
+                    if not f.get("title"):
+                        for k in ("vulnerability", "name", "issue", "summary"):
+                            if f.get(k):
+                                f["title"] = f[k]
+                                break
+                    if not f.get("explanation") and f.get("description"):
+                        f["explanation"] = f["description"]
+                    if not f.get("impact"):
+                        for k in ("impact", "consequence", "effect"):
+                            if f.get(k):
+                                f["impact"] = f[k]
+                                break
+                    if not f.get("file") or f.get("file") == "unknown":
+                        for k in ("location", "contract", "contract_name"):
+                            if f.get(k):
+                                f["file"] = f[k]
+                                break
+                    if not f.get("fix_snippet"):
+                        for k in ("fix_snippet", "fix", "recommendation", "remediation", "mitigation"):
+                            if f.get(k):
+                                f["fix_snippet"] = f[k]
+                                break
+                    # Coerce line to a usable int, accepting aliases and "L42".
+                    if not isinstance(f.get("line"), int) or isinstance(f.get("line"), bool):
+                        f["line"] = self._coerce_line(
+                            f.get("line") or f.get("line_number") or f.get("lineNumber")
+                        )
+                    # Last resort: derive a title from the first sentence of the
+                    # explanation (do not split on member access like tx.origin).
+                    if not f.get("title") and f.get("explanation"):
+                        expl = str(f["explanation"])
+                        m = re.search(r"[.!?](?:\s|$)", expl)
+                        first = (expl[: m.start()] if m else expl).strip()
+                        f["title"] = (first or "AI-identified issue")[:120]
+                    # Ensure the standard finding fields so AI findings flow
+                    # through scoring and reporting like static ones.
+                    f.setdefault("title", "AI-identified issue")
+                    f.setdefault("severity", "Medium")
+                    f.setdefault("file", context["contract_name"])
+                    f.setdefault("line", 0)
+                    f.setdefault("vulnerable_snippet", "")
                     f["rule"] = "AI_Reasoning"
                     f["source"] = "ai"
                     findings.append(f)
@@ -51,6 +114,22 @@ class ReasoningAgent:
                 logger.debug(f"No AI result for contract {contract.get('name')}")
 
         return findings
+
+    @staticmethod
+    def _coerce_line(value: Any) -> int:
+        """Best-effort convert a model-supplied line value to a positive int."""
+        if isinstance(value, bool):
+            return 0
+        if isinstance(value, int):
+            return value if value > 0 else 0
+        match = re.search(r"\d+", str(value or ""))
+        if match:
+            try:
+                n = int(match.group())
+                return n if n > 0 else 0
+            except ValueError:
+                return 0
+        return 0
 
     def score_contract(self, contract: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """

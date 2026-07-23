@@ -6,7 +6,7 @@ Placeholder watcher for CI/CD pipeline status.
 """
 
 import logging
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 from ..watcher_base import Watcher
 

@@ -7,6 +7,7 @@ delegatecall misuse: detect calls to untrusted addresses via delegatecall.
 
 from . import BaseRule
 
+
 class DelegatecallMisuseRule(BaseRule):
     severity = "Critical"
     explanation_template = (
@@ -19,7 +20,7 @@ class DelegatecallMisuseRule(BaseRule):
         "leading to complete loss of funds or contract takeover."
     )
     fix_template = (
-        "Avoid `delegatecall` to user‑supplied addresses. If necessary, use a whitelist of trusted targets:\n"
+        "Avoid `delegatecall` to user-supplied addresses. If necessary, use a whitelist of trusted targets:\n"
         "```solidity\n"
         "address trustedImplementation = ...;\n"
         "require(target == trustedImplementation, \"Unauthorized target\");\n"

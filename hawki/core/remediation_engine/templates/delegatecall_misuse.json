@@ -1,0 +1,5 @@
+{
+  "explanation": "delegatecall executes external code in the context of the calling contract, sharing its storage, balance, and msg.sender. Calling delegatecall on an attacker controlled or unvalidated target lets that code overwrite storage slots (including the owner slot) and take over the contract.",
+  "impact": "An attacker who controls the delegatecall target can rewrite arbitrary storage, seize ownership, and drain all funds. The classic Parity multisig freeze stemmed from delegatecall misuse.",
+  "fix_snippet": "// Never delegatecall into user supplied or unvalidated addresses.\n// Whitelist implementations and align storage layouts.\naddress private immutable IMPLEMENTATION;\n\nconstructor(address impl) {\n    require(impl != address(0), \"Invalid implementation\");\n    IMPLEMENTATION = impl;\n}\n\nfunction _execute(bytes calldata data) internal {\n    (bool ok, ) = IMPLEMENTATION.delegatecall(data);\n    require(ok, \"Delegatecall failed\");\n}\n\n// For upgradeable contracts use the audited ERC1967/UUPS proxy from\n// OpenZeppelin instead of hand rolling delegatecall."
+}

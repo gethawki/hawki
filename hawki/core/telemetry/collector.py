@@ -2,13 +2,13 @@
 # File: hawki/core/telemetry/collector.py
 # --------------------
 """
-Metrics collector – gathers anonymous usage data after a scan.
+Metrics collector - gathers anonymous usage data after a scan.
 """
 
 import logging
 import platform
 from datetime import datetime
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 from .store import MetricsStore
 
@@ -74,3 +74,4 @@ class MetricsCollector:
                 sim_rate = successful / len(results)
 
         return self.collect(scan_metadata, severity_counts, sim_rate)
+# EOF

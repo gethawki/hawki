@@ -9,7 +9,7 @@ Produces a structured representation for further analysis.
 
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
 
 import tree_sitter
 import tree_sitter_solidity
@@ -46,7 +46,7 @@ class SolidityParser:
         Returns None if parsing fails.
         """
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, encoding='utf-8') as f:
                 source_code = f.read()
         except Exception as e:
             logger.error(f"Failed to read {file_path}: {e}")
@@ -91,7 +91,7 @@ class SolidityParser:
 
         return contracts
 
-    # ✅ FIXED — recursive search
+    # ✅ FIXED - recursive search
     def _extract_functions(self, contract_node: tree_sitter.Node, source: str) -> List[Dict]:
         """Extract function definitions inside a contract."""
         functions = []

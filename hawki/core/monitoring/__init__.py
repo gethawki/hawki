@@ -2,18 +2,18 @@
 # File: hawki/core/monitoring/__init__.py
 # --------------------
 """
-Monitoring subsystem: auto‑discovers watchers and runs continuous checks.
+Monitoring subsystem: auto-discovers watchers and runs continuous checks.
 """
 
 import importlib
 import logging
 import time
 from pathlib import Path
-from typing import List, Type, Dict, Any, Optional
+from typing import Any, Dict, List, Optional, Type
 
-from .watcher_base import Watcher
-from .state_manager import StateManager
 from .alert_manager import AlertManager
+from .state_manager import StateManager
+from .watcher_base import Watcher
 
 logger = logging.getLogger(__name__)
 

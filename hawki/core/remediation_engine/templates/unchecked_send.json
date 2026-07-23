@@ -1,0 +1,5 @@
+{
+  "explanation": "The low level send and call methods return a boolean instead of reverting on failure. If that return value is ignored, the contract continues as though the transfer succeeded even when it did not, leaving accounting and actual balances out of sync.",
+  "impact": "State updates (marking a withdrawal complete, decrementing a balance) proceed while the ETH never moves, or the reverse, enabling accounting corruption and stuck or double spent funds.",
+  "fix_snippet": "// Always check the return value of low level calls and revert on failure.\nfunction withdraw(uint256 amount) external {\n    require(balances[msg.sender] >= amount, \"Insufficient\");\n    balances[msg.sender] -= amount; // effects before interaction\n    (bool ok, ) = msg.sender.call{value: amount}(\"\");\n    require(ok, \"Transfer failed\");\n}\n\n// Or use OpenZeppelin Address.sendValue, which reverts on failure:\n// Address.sendValue(payable(msg.sender), amount);"
+}

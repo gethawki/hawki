@@ -1,0 +1,5 @@
+{
+  "explanation": "In a proxy pattern the admin can swap the implementation contract at will. If the upgrade authority is a single key with no delay, that key holder can point the proxy at malicious logic and immediately compromise every user.",
+  "impact": "A compromised or malicious upgrade admin can replace the implementation with code that steals funds or freezes withdrawals, with no warning to users. Unprotected upgrade paths are a top tier centralization and security risk.",
+  "fix_snippet": "// Gate upgrades behind a multisig plus timelock, and authorize UUPS\n// upgrades explicitly.\nimport \"@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol\";\nimport \"@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol\";\n\ncontract Vault is UUPSUpgradeable, OwnableUpgradeable {\n    // Only the owner (set to a Timelock owned by a multisig) may upgrade.\n    function _authorizeUpgrade(address newImpl) internal override onlyOwner {}\n}\n\n// Transfer ownership to a TimelockController so every upgrade is\n// queued, delayed, and publicly observable before it executes."
+}

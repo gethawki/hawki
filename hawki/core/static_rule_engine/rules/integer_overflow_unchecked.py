@@ -7,17 +7,18 @@ Integer overflow in unchecked blocks: detect arithmetic inside `unchecked` block
 
 from . import BaseRule
 
+
 class IntegerOverflowUncheckedRule(BaseRule):
     severity = "Critical"
     explanation_template = (
-        "Arithmetic inside `unchecked` blocks bypasses Solidity's built‑in overflow checks. If the values are unbounded, "
+        "Arithmetic inside `unchecked` blocks bypasses Solidity's built-in overflow checks. If the values are unbounded, "
         "this can lead to integer overflow/underflow vulnerabilities."
     )
     impact_template = (
         "An attacker can manipulate arithmetic to cause unexpected behavior, such as inflating balances or breaking invariants."
     )
     fix_template = (
-        "Avoid `unchecked` for user‑supplied values. If necessary, ensure the operation cannot overflow by adding explicit checks:\n"
+        "Avoid `unchecked` for user-supplied values. If necessary, ensure the operation cannot overflow by adding explicit checks:\n"
         "```solidity\n"
         "unchecked {\n"
         "    require(x <= type(uint256).max - y, \"overflow\");\n"

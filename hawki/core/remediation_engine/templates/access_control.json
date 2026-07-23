@@ -1,0 +1,5 @@
+{
+  "explanation": "A state changing function is callable by any account because it lacks an authorization check. Sensitive operations such as minting, pausing, withdrawing, or changing configuration must be restricted to a trusted role.",
+  "impact": "Any external account can invoke the privileged function and take over administrative control, drain funds, or brick the contract. This is one of the most frequently exploited classes of smart contract bugs.",
+  "fix_snippet": "// Restrict the sensitive function with a role check.\n// Prefer OpenZeppelin AccessControl for granular roles.\nimport \"@openzeppelin/contracts/access/Ownable.sol\";\n\ncontract Vault is Ownable {\n    function {{function_name}}() external onlyOwner {\n        // privileged logic stays here, now gated by onlyOwner\n    }\n}\n\n// Or with role based access control:\n// bytes32 public constant OPERATOR_ROLE = keccak256(\"OPERATOR_ROLE\");\n// function withdraw() external onlyRole(OPERATOR_ROLE) { ... }"
+}

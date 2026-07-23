@@ -1,12 +1,10 @@
-# --------------------
 # File: hawki/core/telemetry/__init__.py
-# --------------------
 """
-Telemetry module for opt‑in anonymous usage metrics.
+Telemetry module for local anonymous usage metrics (no network export).
 """
 
 from .collector import MetricsCollector
 from .store import MetricsStore
-from .exporter import MetricsExporter
 
-__all__ = ["MetricsCollector", "MetricsStore", "MetricsExporter"]
+__all__ = ["MetricsCollector", "MetricsStore"]
+# EOF

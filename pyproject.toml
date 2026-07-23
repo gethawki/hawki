@@ -4,14 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hawki"
-version = "0.7.0"  # Bumped to v0.7.0
-description = "Holistic Analysis for Web3 Kode & Infrastructure – Security intelligence platform"
+version = "1.0.0"
+description = "Holistic Analysis for Web3 Kode and Infrastructure - Security intelligence platform"
 readme = "README.md"
 authors = [{name = "0xSemantic", email = "0xsemantic@example.com"}]
 license = {text = "MIT"}
 requires-python = ">=3.9"
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Topic :: Security",
     "Topic :: Software Development :: Testing",
@@ -30,10 +30,12 @@ dependencies = [
     "colorlog>=6.7.0",
     "litellm>=1.0.0",
     "docker>=6.1.3",
-    "web3>=6.15.0",
+    "web3>=6.15.0,<7",
     "py-solc-x>=2.0.0",
     "eth-account>=0.8.0",
     "rich>=13.0.0",
+    "packaging>=23.3",
+    "toml>=0.10.2",
 ]
 
 [project.optional-dependencies]
@@ -44,8 +46,15 @@ reports = [
 pdf = [
     "pdfkit>=1.0.0",
 ]
+prove = [
+    "z3-solver==4.12.2.0",
+]
+dev = [
+    "pytest>=7.0.0",
+    "ruff>=0.1.0",
+]
 all = [
-    "hawki[reports,pdf]",
+    "hawki[reports,pdf,prove]",
 ]
 
 [project.scripts]
@@ -61,3 +70,19 @@ include = ["hawki*", "cli*"]
 "hawki.core.monitoring" = ["watchers/*.py"]
 "hawki.core.data_layer.reporting" = ["templates/*.md", "templates/*.html", "templates/*.json"]
 "hawki" = ["py.typed"]
+[tool.coverage.run]
+source = ["hawki"]
+omit = [
+    # Runtime exploit payloads executed inside the Docker sandbox with env-provided
+    # contract addresses; they are never imported by the test suite and cannot be
+    # unit-tested without a live container, so they are excluded from coverage.
+    "hawki/core/exploit_sandbox/attack_scripts/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+]

@@ -7,7 +7,8 @@ Watcher that polls a Git repository for new commits.
 
 import logging
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+
 import git
 from git.exc import InvalidGitRepositoryError
 

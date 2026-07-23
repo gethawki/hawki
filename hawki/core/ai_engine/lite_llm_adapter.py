@@ -8,7 +8,7 @@ Handles API key management, retries, and error logging.
 
 import logging
 import os
-from typing import Optional, Dict, List
+from typing import Dict, List, Optional
 
 from litellm import completion
 from litellm.exceptions import (
@@ -20,7 +20,7 @@ from litellm.exceptions import (
 logger = logging.getLogger(__name__)
 
 class LiteLLMAdapter:
-    """Wrapper around LiteLLM with built‑in error handling and configuration."""
+    """Wrapper around LiteLLM with built-in error handling and configuration."""
 
     DEFAULT_MODEL = "gemini/gemini-1.5-flash"  # Free tier, widely available
 

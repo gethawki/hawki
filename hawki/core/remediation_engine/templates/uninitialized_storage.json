@@ -1,0 +1,5 @@
+{
+  "explanation": "An uninitialized storage pointer (a local struct or mapping reference declared without assignment in older Solidity) defaults to storage slot 0. Writing through it silently overwrites the first state variables, which are often the owner or critical accounting fields.",
+  "impact": "Attacker controlled writes can clobber the owner slot or balance mappings, leading to full takeover or fund loss. This is a subtle bug that has caused real exploits in older contracts.",
+  "fix_snippet": "// Compile with a recent Solidity: since 0.5.0 uninitialized storage\n// pointers are a compile error. Prefer memory for locals and be\n// explicit about the data location.\npragma solidity ^0.8.20;\n\nstruct Order { uint256 amount; address maker; }\n\nfunction create(uint256 amount) external {\n    // Explicit memory, then persist deliberately:\n    Order memory o = Order({amount: amount, maker: msg.sender});\n    orders[nextId++] = o;\n}\n\n// Never leave a `Struct storage x;` local unassigned."
+}

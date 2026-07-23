@@ -25,7 +25,8 @@ Use Cases:
 """
 
 import logging
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+
 from web3 import Web3
 
 # -------------------------------------------------------------------

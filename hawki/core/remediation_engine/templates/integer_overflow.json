@@ -1,0 +1,5 @@
+{
+  "explanation": "Arithmetic on fixed width integers can wrap around: a subtraction below zero or an addition above the type maximum silently produces a wrong value. Before Solidity 0.8, or inside unchecked blocks, this happens without reverting.",
+  "impact": "An attacker can underflow a balance to a huge number, mint unlimited tokens, or bypass supply caps, leading to direct theft of funds. The 2018 BEC and SMT token hacks were classic overflow exploits.",
+  "fix_snippet": "// Use Solidity >= 0.8.0 so arithmetic reverts on overflow by default.\npragma solidity ^0.8.20;\n\nfunction transfer(address to, uint256 amount) external {\n    // These now revert automatically on underflow/overflow:\n    balances[msg.sender] -= amount;\n    balances[to] += amount;\n}\n\n// For Solidity < 0.8, use OpenZeppelin SafeMath:\n// using SafeMath for uint256;\n// balances[msg.sender] = balances[msg.sender].sub(amount);\n// Only use unchecked { } when you have proven the bounds are safe."
+}

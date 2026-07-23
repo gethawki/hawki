@@ -1,0 +1,5 @@
+{
+  "explanation": "A single externally owned account holds unilateral power over critical protocol functions (upgrades, fund movement, parameter changes). If that key is lost, phished, or acts maliciously, users have no protection.",
+  "impact": "A compromised or rogue owner key can rug the protocol instantly: drain the treasury, mint unlimited tokens, or freeze withdrawals. Centralization is also a common audit finding that erodes user trust.",
+  "fix_snippet": "// Replace the single owner with a multisig and a timelock.\n// 1. Transfer ownership to a Gnosis Safe (M of N signers).\n// 2. Route privileged calls through a TimelockController so users\n//    can observe and exit before a change takes effect.\nimport \"@openzeppelin/contracts/governance/TimelockController.sol\";\n\n// Deploy TimelockController(minDelay, proposers, executors, admin)\n// then: ownable.transferOwnership(address(timelock));\n// Privileged actions are now queued, delayed, and publicly visible."
+}

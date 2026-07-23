@@ -2,14 +2,14 @@
 # File: hawki/core/ai_engine/llm_orchestrator.py
 # --------------------
 """
-High‑level orchestrator for LLM interactions.
+High-level orchestrator for LLM interactions.
 Manages prompt rendering, calling the adapter, and parsing responses.
 """
 
 import json
 import logging
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
 
 from .lite_llm_adapter import LiteLLMAdapter
 from .prompt_manager import PromptManager

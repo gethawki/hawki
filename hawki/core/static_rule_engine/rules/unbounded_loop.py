@@ -6,7 +6,9 @@ Unbounded loop: loops that iterate over dynamic arrays may exceed block gas limi
 """
 
 import re
+
 from . import BaseRule
+
 
 class UnboundedLoopRule(BaseRule):
     severity = "High"
