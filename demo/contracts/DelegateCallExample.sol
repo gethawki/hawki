@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 /**
  * @title DelegateCallExample
- * @dev Uses delegatecall on an arbitrary address – dangerous.
+ * @dev Uses delegatecall on an arbitrary address - dangerous.
  */
 contract DelegateCallExample {
     address public target;

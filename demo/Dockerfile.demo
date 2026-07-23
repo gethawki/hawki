@@ -19,5 +19,5 @@ CMD npx hardhat node --hostname 0.0.0.0 & \
     sleep 5 && \
     npx hardhat run scripts/deploy.js --network localhost && \
     echo "Running Hawk-i full audit..." && \
-    hawki scan /app --ai --sandbox --format html --telemetry && \
+    hawki scan /app --ai --sandbox --format html && \
     echo "Demo complete. Reports are in /app/hawki_reports"

@@ -1,0 +1,36 @@
+name: Hawk-i Deep Security Scan
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  deep-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Hawk-i
+        run: pip install hawki
+      - name: Run Deep Agent (limited budget)
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          hawki deep . \
+            --goal "find critical vulnerabilities" \
+            --budget-attempts 10 \
+            --budget-tokens 50000 \
+            --llm-provider openai \
+            --llm-model gpt-4 \
+            --format md \
+            --output report.md
+      - name: Upload Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: hawki-report
+          path: report.md

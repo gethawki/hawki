@@ -1,0 +1,4100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hawk-i Audit Report</title>
+    <style>
+        :root {
+            --steel: #687F97;
+            --ink: #0c0c0c;
+            --panel: #151515;
+            --panel-2: #1e1e1e;
+            --border: #2a2a2a;
+            --text: #e5e5e5;
+            --muted: #9aa4ad;
+        }
+        body {
+            background-color: var(--ink);
+            color: var(--text);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+        h1, h2, h3, h4 { color: var(--steel); }
+        h1 { margin-top: 0; }
+        a { color: var(--steel); }
+        pre {
+            background-color: var(--panel-2);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid var(--steel);
+            overflow-x: auto;
+        }
+        code { font-family: 'Fira Code', ui-monospace, monospace; color: #d4d4d4; }
+        table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+        th, td { border: 1px solid var(--border); padding: 0.5rem; text-align: left; }
+        th { background-color: var(--panel-2); color: var(--steel); }
+        .summary-box {
+            background-color: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .score { font-size: 2rem; font-weight: bold; }
+        .score.secure { color: #4CAF50; }
+        .score.minor-risk { color: #8BC34A; }
+        .score.moderate-risk { color: #FFC107; }
+        .score.high-risk { color: #FF9800; }
+        .score.critical-risk { color: #F44336; }
+        img { max-width: 100%; height: auto; border-radius: 0.5rem; }
+
+        .finding {
+            background-color: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .finding h3 { margin-top: 0; }
+        .finding .label {
+            color: var(--muted);
+            text-transform: uppercase;
+            font-size: 0.72rem;
+            letter-spacing: 0.06em;
+            margin: 1rem 0 0.25rem;
+            font-weight: 600;
+        }
+        .loc { font-family: 'Fira Code', ui-monospace, monospace; color: var(--text); }
+        .badge {
+            display: inline-block;
+            padding: 0.15rem 0.6rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            vertical-align: middle;
+        }
+        .badge.critical { background: #F44336; color: #fff; }
+        .badge.high { background: #FF9800; color: #1a1a1a; }
+        .badge.medium { background: #FFC107; color: #1a1a1a; }
+        .badge.low { background: #8BC34A; color: #1a1a1a; }
+        .badge.info { background: #687F97; color: #fff; }
+    </style>
+</head>
+<body>
+    <h1>Hawk-i Audit Report</h1>
+    <p><strong>Generated:</strong> 2026-07-23T13:27:42.608606Z</p>
+
+    <div class="summary-box">
+        <h2>Executive Summary</h2>
+        <ul>
+            <li><strong>Mode:</strong> minimal (AI: False, Sandbox: False)</li>
+            <li><strong>Repository:</strong> demo/damn-vulnerable-defi/src (local)</li>
+            <li><strong>Contracts Scanned:</strong> 42</li>
+            <li><strong>Files Analyzed:</strong> 53</li>
+            <li><strong>Total Findings:</strong> 136</li>
+            <li><strong>Severity Breakdown:</strong> Critical: 22, High: 44, Medium: 47, Low: 15, Info: 8</li>
+            <li><strong>Simulation Success Rate:</strong> N/A</li>
+            <li><strong>Security Score:</strong> <span class="score critical-risk">0/100 (Critical Risk)</span></li>
+        </ul>
+        
+        <p><em>AI reasoning was not enabled during this scan.</em></p>
+        
+        
+        <p><em>Exploit simulation was not executed.</em></p>
+        
+    </div>
+
+    <h2>Vulnerability Breakdown</h2>
+    <h3>Severity Distribution</h3>
+    
+    <img src="charts/severity_pie.png" alt="Severity Pie Chart">
+    
+
+    <h3>Vulnerability Types (Top 10)</h3>
+    
+    <img src="charts/type_bar.png" alt="Type Bar Chart">
+    
+
+    <h3>Severity Table</h3>
+    <table>
+        <thead><tr><th>Severity</th><th>Count</th></tr></thead>
+        <tbody>
+            <tr><td>Critical</td><td>22</td></tr>
+            <tr><td>High</td><td>44</td></tr>
+            <tr><td>Medium</td><td>47</td></tr>
+            <tr><td>Low</td><td>15</td></tr>
+            <tr><td>Info</td><td>8</td></tr>
+        </tbody>
+    </table>
+
+    <h2>Detailed Findings</h2>
+    <p>Each finding shows where the flaw is, the code responsible, why it is
+    dangerous, its impact, and a concrete fix.</p>
+
+    
+    <div class="finding">
+        <h3>F001: Costly operation inside a loop <span class="badge low">Low</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/the-rewarder/TheRewarderDistributor.sol:75</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>73 |     IERC20 token = tokens[i];
+  74 |     if (distributions[token].remaining == 0) {
+> 75 |         token.transfer(owner, token.balanceOf(address(this)));
+  76 |     }
+  77 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>A loop body performs a gas-heavy operation on every iteration: an external call (`.call`/`.transfer`/`.send`) or a storage-array `.push`. Gas cost grows linearly with the iteration count, and external calls add untrusted code execution per element.</p>
+
+        <div class="label">Impact</div>
+        <p>Once the iterated collection grows large enough, the transaction exceeds the block gas limit and the function becomes permanently uncallable (denial of service). With per-recipient transfers, a single reverting recipient can also block the entire batch.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Move to a pull-payment model (recipients withdraw individually), bound the iteration count, or process the collection in resumable batches instead of calling out / growing storage inside one unbounded loop.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F002: Costly operation inside a loop <span class="badge low">Low</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/the-rewarder/TheRewarderDistributor.sol:116</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>114 |         if (!MerkleProof.verify(inputClaim.proof, root, leaf)) revert InvalidProof();
+  115 |
+> 116 |         inputTokens[inputClaim.tokenIndex].transfer(msg.sender, inputClaim.amount);
+  117 |     }
+  118 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>A loop body performs a gas-heavy operation on every iteration: an external call (`.call`/`.transfer`/`.send`) or a storage-array `.push`. Gas cost grows linearly with the iteration count, and external calls add untrusted code execution per element.</p>
+
+        <div class="label">Impact</div>
+        <p>Once the iterated collection grows large enough, the transaction exceeds the block gas limit and the function becomes permanently uncallable (denial of service). With per-recipient transfers, a single reverting recipient can also block the entire batch.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Move to a pull-payment model (recipients withdraw individually), bound the iteration count, or process the collection in resumable batches instead of calling out / growing storage inside one unbounded loop.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F003: Unsafe delegatecall <span class="badge critical">Critical</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/unstoppable/UnstoppableVault.sol:125</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>123 | // Allow owner to execute arbitrary changes when paused
+  124 | function execute(address target, bytes memory data) external onlyOwner whenPaused {
+> 125 |     (bool success,) = target.delegatecall(data);
+  126 |     require(success);
+  127 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>`delegatecall` executes code from another contract in the context of the caller. If the target address can be controlled by an attacker, they can manipulate the contract's storage and potentially drain funds or take over the contract.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker can execute arbitrary code in the context of the vulnerable contract, leading to complete loss of funds or contract takeover.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Never delegatecall into user supplied or unvalidated addresses.
+// Whitelist implementations and align storage layouts.
+address private immutable IMPLEMENTATION;
+
+constructor(address impl) {
+    require(impl != address(0), "Invalid implementation");
+    IMPLEMENTATION = impl;
+}
+
+function _execute(bytes calldata data) internal {
+    (bool ok, ) = IMPLEMENTATION.delegatecall(data);
+    require(ok, "Delegatecall failed");
+}
+
+// For upgradeable contracts use the audited ERC1967/UUPS proxy from
+// OpenZeppelin instead of hand rolling delegatecall.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F004: Unchecked ERC20 transfer <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/curvy-puppet/CurvyPuppetLending.sol:58</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>56 |
+  57 |     positions[msg.sender].collateralAmount = remainingCollateral;
+> 58 |     IERC20(collateralAsset).transfer(msg.sender, amount);
+  59 | }
+  60 |</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>An ERC20 `transfer`/`transferFrom` call is executed as a bare statement, discarding its boolean return value. Many widely used tokens (e.g. USDT, BNB-chain BEP20s) signal failure by returning false instead of reverting, so the surrounding logic proceeds as if the tokens moved when they did not.</p>
+
+        <div class="label">Impact</div>
+        <p>Accounting desynchronizes from real balances: deposits can be credited without tokens arriving, withdrawals marked paid without tokens leaving, enabling theft or permanent loss of user funds.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Wrap the call: `require(token.transfer(to, amount), "transfer failed");` or, better, use OpenZeppelin's SafeERC20 (`using SafeERC20 for IERC20;` then `token.safeTransfer(...)`), which also handles non-standard tokens that return no value.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F005: Unchecked ERC20 transfer <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/curvy-puppet/CurvyPuppetLending.sol:82</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>80 |     // Update caller's position and transfer borrowed assets
+  81 |     positions[msg.sender].borrowAmount += amount;
+> 82 |     IERC20(borrowAsset).transfer(msg.sender, amount);
+  83 | }
+  84 |</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>An ERC20 `transfer`/`transferFrom` call is executed as a bare statement, discarding its boolean return value. Many widely used tokens (e.g. USDT, BNB-chain BEP20s) signal failure by returning false instead of reverting, so the surrounding logic proceeds as if the tokens moved when they did not.</p>
+
+        <div class="label">Impact</div>
+        <p>Accounting desynchronizes from real balances: deposits can be credited without tokens arriving, withdrawals marked paid without tokens leaving, enabling theft or permanent loss of user funds.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Wrap the call: `require(token.transfer(to, amount), "transfer failed");` or, better, use OpenZeppelin's SafeERC20 (`using SafeERC20 for IERC20;` then `token.safeTransfer(...)`), which also handles non-standard tokens that return no value.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F006: Unchecked ERC20 transfer <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/curvy-puppet/CurvyPuppetLending.sol:93</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>91 |         uint256 returnAmount = positions[msg.sender].collateralAmount;
+  92 |         positions[msg.sender].collateralAmount = 0;
+> 93 |         IERC20(collateralAsset).transfer(msg.sender, returnAmount);
+  94 |     }
+  95 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>An ERC20 `transfer`/`transferFrom` call is executed as a bare statement, discarding its boolean return value. Many widely used tokens (e.g. USDT, BNB-chain BEP20s) signal failure by returning false instead of reverting, so the surrounding logic proceeds as if the tokens moved when they did not.</p>
+
+        <div class="label">Impact</div>
+        <p>Accounting desynchronizes from real balances: deposits can be credited without tokens arriving, withdrawals marked paid without tokens leaving, enabling theft or permanent loss of user funds.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Wrap the call: `require(token.transfer(to, amount), "transfer failed");` or, better, use OpenZeppelin's SafeERC20 (`using SafeERC20 for IERC20;` then `token.safeTransfer(...)`), which also handles non-standard tokens that return no value.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F007: Unchecked ERC20 transfer <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/curvy-puppet/CurvyPuppetLending.sol:108</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>106 |
+  107 |     _pullAssets(borrowAsset, borrowAmount);
+> 108 |     IERC20(collateralAsset).transfer(msg.sender, collateralAmount);
+  109 | }
+  110 |</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>An ERC20 `transfer`/`transferFrom` call is executed as a bare statement, discarding its boolean return value. Many widely used tokens (e.g. USDT, BNB-chain BEP20s) signal failure by returning false instead of reverting, so the surrounding logic proceeds as if the tokens moved when they did not.</p>
+
+        <div class="label">Impact</div>
+        <p>Accounting desynchronizes from real balances: deposits can be credited without tokens arriving, withdrawals marked paid without tokens leaving, enabling theft or permanent loss of user funds.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Wrap the call: `require(token.transfer(to, amount), "transfer failed");` or, better, use OpenZeppelin's SafeERC20 (`using SafeERC20 for IERC20;` then `token.safeTransfer(...)`), which also handles non-standard tokens that return no value.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F008: Unchecked ERC20 transfer <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/wallet-mining/WalletDeployer.sol:58</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>56 |
+  57 | if (IERC20(gem).balanceOf(address(this)) >= pay) {
+> 58 |     IERC20(gem).transfer(msg.sender, pay);
+  59 | }
+  60 | return true;</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>An ERC20 `transfer`/`transferFrom` call is executed as a bare statement, discarding its boolean return value. Many widely used tokens (e.g. USDT, BNB-chain BEP20s) signal failure by returning false instead of reverting, so the surrounding logic proceeds as if the tokens moved when they did not.</p>
+
+        <div class="label">Impact</div>
+        <p>Accounting desynchronizes from real balances: deposits can be credited without tokens arriving, withdrawals marked paid without tokens leaving, enabling theft or permanent loss of user funds.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Wrap the call: `require(token.transfer(to, amount), "transfer failed");` or, better, use OpenZeppelin's SafeERC20 (`using SafeERC20 for IERC20;` then `token.safeTransfer(...)`), which also handles non-standard tokens that return no value.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F009: Unchecked ERC20 transfer <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/selfie/SelfiePool.sol:59</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>57 | }
+  58 |
+> 59 | token.transfer(address(_receiver), _amount);
+  60 | if (_receiver.onFlashLoan(msg.sender, _token, _amount, 0, _data) != CALLBACK_SUCCESS) {
+  61 |     revert CallbackFailed();</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>An ERC20 `transfer`/`transferFrom` call is executed as a bare statement, discarding its boolean return value. Many widely used tokens (e.g. USDT, BNB-chain BEP20s) signal failure by returning false instead of reverting, so the surrounding logic proceeds as if the tokens moved when they did not.</p>
+
+        <div class="label">Impact</div>
+        <p>Accounting desynchronizes from real balances: deposits can be credited without tokens arriving, withdrawals marked paid without tokens leaving, enabling theft or permanent loss of user funds.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Wrap the call: `require(token.transfer(to, amount), "transfer failed");` or, better, use OpenZeppelin's SafeERC20 (`using SafeERC20 for IERC20;` then `token.safeTransfer(...)`), which also handles non-standard tokens that return no value.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F010: Unchecked ERC20 transfer <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/selfie/SelfiePool.sol:73</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>71 | function emergencyExit(address receiver) external onlyGovernance {
+  72 |     uint256 amount = token.balanceOf(address(this));
+> 73 |     token.transfer(receiver, amount);
+  74 |
+  75 |     emit EmergencyExit(receiver, amount);</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>An ERC20 `transfer`/`transferFrom` call is executed as a bare statement, discarding its boolean return value. Many widely used tokens (e.g. USDT, BNB-chain BEP20s) signal failure by returning false instead of reverting, so the surrounding logic proceeds as if the tokens moved when they did not.</p>
+
+        <div class="label">Impact</div>
+        <p>Accounting desynchronizes from real balances: deposits can be credited without tokens arriving, withdrawals marked paid without tokens leaving, enabling theft or permanent loss of user funds.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Wrap the call: `require(token.transfer(to, amount), "transfer failed");` or, better, use OpenZeppelin's SafeERC20 (`using SafeERC20 for IERC20;` then `token.safeTransfer(...)`), which also handles non-standard tokens that return no value.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F011: Unchecked ERC20 transfer <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/the-rewarder/TheRewarderDistributor.sol:75</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>73 |     IERC20 token = tokens[i];
+  74 |     if (distributions[token].remaining == 0) {
+> 75 |         token.transfer(owner, token.balanceOf(address(this)));
+  76 |     }
+  77 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>An ERC20 `transfer`/`transferFrom` call is executed as a bare statement, discarding its boolean return value. Many widely used tokens (e.g. USDT, BNB-chain BEP20s) signal failure by returning false instead of reverting, so the surrounding logic proceeds as if the tokens moved when they did not.</p>
+
+        <div class="label">Impact</div>
+        <p>Accounting desynchronizes from real balances: deposits can be credited without tokens arriving, withdrawals marked paid without tokens leaving, enabling theft or permanent loss of user funds.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Wrap the call: `require(token.transfer(to, amount), "transfer failed");` or, better, use OpenZeppelin's SafeERC20 (`using SafeERC20 for IERC20;` then `token.safeTransfer(...)`), which also handles non-standard tokens that return no value.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F012: Unchecked ERC20 transfer <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/puppet-v2/PuppetV2Pool.sol:40</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>38 |
+  39 | // Take the WETH
+> 40 | _weth.transferFrom(msg.sender, address(this), amount);
+  41 |
+  42 | // internal accounting</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>An ERC20 `transfer`/`transferFrom` call is executed as a bare statement, discarding its boolean return value. Many widely used tokens (e.g. USDT, BNB-chain BEP20s) signal failure by returning false instead of reverting, so the surrounding logic proceeds as if the tokens moved when they did not.</p>
+
+        <div class="label">Impact</div>
+        <p>Accounting desynchronizes from real balances: deposits can be credited without tokens arriving, withdrawals marked paid without tokens leaving, enabling theft or permanent loss of user funds.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Wrap the call: `require(token.transfer(to, amount), "transfer failed");` or, better, use OpenZeppelin's SafeERC20 (`using SafeERC20 for IERC20;` then `token.safeTransfer(...)`), which also handles non-standard tokens that return no value.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F013: Potential flash loan manipulation <span class="badge critical">Critical</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/puppet-v2/UniswapV2Library.sol:44</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>42 | {
+  43 |     (address token0,) = sortTokens(tokenA, tokenB);
+> 44 |     (uint256 reserve0, uint256 reserve1,) = IUniswapV2Pair(pairFor(factory, tokenA, tokenB)).getReserves();
+  45 |     (reserveA, reserveB) = tokenA == token0 ? (reserve0, reserve1) : (reserve1, reserve0);
+  46 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Using spot prices derived from pool reserves in the same transaction allows an attacker to take a flash loan, manipulate the price, and profit before repaying the loan.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker can drain funds by artificially inflating/deflating prices and trading against the protocol.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>function swap(uint amountIn) public returns (uint) {
+    uint price = getTwapPrice(); // use TWAP
+    uint amountOut = amountIn * price / 1e18;
+    // ...
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F014: Potential front-running via block.timestamp/number <span class="badge low">Low</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/DamnValuableStaking.sol:29</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>27 |     token = _dvt;
+  28 |     rate = _rate;
+> 29 |     lastUpdate = block.timestamp;
+  30 | }
+  31 |</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Using `block.timestamp` or `block.number` for critical logic can allow miners or bots to front-run transactions by manipulating the block parameters or ordering.</p>
+
+        <div class="label">Impact</div>
+        <p>Attackers can exploit front-running to gain unfair advantage, e.g., by seeing a pending trade and inserting their own transaction first.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Add slippage protection and, where ordering matters, commit reveal.
+function swap(uint amountIn, uint minAmountOut, uint deadline) external {
+    require(block.timestamp <= deadline, "Expired");
+    uint amountOut = _swap(amountIn);
+    require(amountOut >= minAmountOut, "Slippage exceeded");
+}
+
+// Commit reveal for order sensitive actions:
+// 1. commit(keccak256(abi.encode(value, salt)))
+// 2. later reveal(value, salt) and verify the stored hash.
+// Consider private mempools or batch auctions to remove ordering advantage.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F015: Potential front-running via block.timestamp/number <span class="badge low">Low</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/curvy-puppet/CurvyPuppetOracle.sol:28</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>26 |
+  27 | if (price.value == 0) revert UnsupportedAsset();
+> 28 | if (block.timestamp > price.expiration) revert StalePrice();
+  29 |
+  30 | return price;</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Using `block.timestamp` or `block.number` for critical logic can allow miners or bots to front-run transactions by manipulating the block parameters or ordering.</p>
+
+        <div class="label">Impact</div>
+        <p>Attackers can exploit front-running to gain unfair advantage, e.g., by seeing a pending trade and inserting their own transaction first.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Add slippage protection and, where ordering matters, commit reveal.
+function swap(uint amountIn, uint minAmountOut, uint deadline) external {
+    require(block.timestamp <= deadline, "Expired");
+    uint amountOut = _swap(amountIn);
+    require(amountOut >= minAmountOut, "Slippage exceeded");
+}
+
+// Commit reveal for order sensitive actions:
+// 1. commit(keccak256(abi.encode(value, salt)))
+// 2. later reveal(value, salt) and verify the stored hash.
+// Consider private mempools or batch auctions to remove ordering advantage.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F016: Potential front-running via block.timestamp/number <span class="badge low">Low</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/shards/ShardsNFTMarketplace.sol:131</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>129 |     rate: _currentRate,
+  130 |     buyer: msg.sender,
+> 131 |     timestamp: uint64(block.timestamp),
+  132 |     cancelled: false
+  133 | })</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Using `block.timestamp` or `block.number` for critical logic can allow miners or bots to front-run transactions by manipulating the block parameters or ordering.</p>
+
+        <div class="label">Impact</div>
+        <p>Attackers can exploit front-running to gain unfair advantage, e.g., by seeing a pending trade and inserting their own transaction first.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Add slippage protection and, where ordering matters, commit reveal.
+function swap(uint amountIn, uint minAmountOut, uint deadline) external {
+    require(block.timestamp <= deadline, "Expired");
+    uint amountOut = _swap(amountIn);
+    require(amountOut >= minAmountOut, "Slippage exceeded");
+}
+
+// Commit reveal for order sensitive actions:
+// 1. commit(keccak256(abi.encode(value, salt)))
+// 2. later reveal(value, salt) and verify the stored hash.
+// Consider private mempools or batch auctions to remove ordering advantage.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F017: Potential front-running via block.timestamp/number <span class="badge low">Low</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/climber/ClimberVault.sol:43</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>41 |
+  42 |     _setSweeper(sweeper);
+> 43 |     _updateLastWithdrawalTimestamp(block.timestamp);
+  44 | }
+  45 |</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Using `block.timestamp` or `block.number` for critical logic can allow miners or bots to front-run transactions by manipulating the block parameters or ordering.</p>
+
+        <div class="label">Impact</div>
+        <p>Attackers can exploit front-running to gain unfair advantage, e.g., by seeing a pending trade and inserting their own transaction first.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Add slippage protection and, where ordering matters, commit reveal.
+function swap(uint amountIn, uint minAmountOut, uint deadline) external {
+    require(block.timestamp <= deadline, "Expired");
+    uint amountOut = _swap(amountIn);
+    require(amountOut >= minAmountOut, "Slippage exceeded");
+}
+
+// Commit reveal for order sensitive actions:
+// 1. commit(keccak256(abi.encode(value, salt)))
+// 2. later reveal(value, salt) and verify the stored hash.
+// Consider private mempools or batch auctions to remove ordering advantage.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F018: Potential front-running via block.timestamp/number <span class="badge low">Low</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/climber/ClimberTimelock.sol:65</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>63 |     }
+  64 |
+> 65 |     operations[id].readyAtTimestamp = uint64(block.timestamp) + delay;
+  66 |     operations[id].known = true;
+  67 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Using `block.timestamp` or `block.number` for critical logic can allow miners or bots to front-run transactions by manipulating the block parameters or ordering.</p>
+
+        <div class="label">Impact</div>
+        <p>Attackers can exploit front-running to gain unfair advantage, e.g., by seeing a pending trade and inserting their own transaction first.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Add slippage protection and, where ordering matters, commit reveal.
+function swap(uint amountIn, uint minAmountOut, uint deadline) external {
+    require(block.timestamp <= deadline, "Expired");
+    uint amountOut = _swap(amountIn);
+    require(amountOut >= minAmountOut, "Slippage exceeded");
+}
+
+// Commit reveal for order sensitive actions:
+// 1. commit(keccak256(abi.encode(value, salt)))
+// 2. later reveal(value, salt) and verify the stored hash.
+// Consider private mempools or batch auctions to remove ordering advantage.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F019: Potential front-running via block.timestamp/number <span class="badge low">Low</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/climber/ClimberTimelockBase.sol:34</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>32 | if (op.executed) {
+  33 |     state = OperationState.Executed;
+> 34 | } else if (block.timestamp < op.readyAtTimestamp) {
+  35 |     state = OperationState.Scheduled;
+  36 | } else {</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Using `block.timestamp` or `block.number` for critical logic can allow miners or bots to front-run transactions by manipulating the block parameters or ordering.</p>
+
+        <div class="label">Impact</div>
+        <p>Attackers can exploit front-running to gain unfair advantage, e.g., by seeing a pending trade and inserting their own transaction first.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Add slippage protection and, where ordering matters, commit reveal.
+function swap(uint amountIn, uint minAmountOut, uint deadline) external {
+    require(block.timestamp <= deadline, "Expired");
+    uint amountOut = _swap(amountIn);
+    require(amountOut >= minAmountOut, "Slippage exceeded");
+}
+
+// Commit reveal for order sensitive actions:
+// 1. commit(keccak256(abi.encode(value, salt)))
+// 2. later reveal(value, salt) and verify the stored hash.
+// Consider private mempools or batch auctions to remove ordering advantage.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F020: Potential front-running via block.timestamp/number <span class="badge low">Low</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/withdrawal/L2MessageStore.sol:18</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>16 |
+  17 | function store(address target, bytes memory data) external {
+> 18 |     bytes32 id = keccak256(abi.encode(nonce, msg.sender, target, block.timestamp, data));
+  19 |
+  20 |     messageStore[id] = true;</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Using `block.timestamp` or `block.number` for critical logic can allow miners or bots to front-run transactions by manipulating the block parameters or ordering.</p>
+
+        <div class="label">Impact</div>
+        <p>Attackers can exploit front-running to gain unfair advantage, e.g., by seeing a pending trade and inserting their own transaction first.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Add slippage protection and, where ordering matters, commit reveal.
+function swap(uint amountIn, uint minAmountOut, uint deadline) external {
+    require(block.timestamp <= deadline, "Expired");
+    uint amountOut = _swap(amountIn);
+    require(amountOut >= minAmountOut, "Slippage exceeded");
+}
+
+// Commit reveal for order sensitive actions:
+// 1. commit(keccak256(abi.encode(value, salt)))
+// 2. later reveal(value, salt) and verify the stored hash.
+// Consider private mempools or batch auctions to remove ordering advantage.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F021: Potential front-running via block.timestamp/number <span class="badge low">Low</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/withdrawal/L1Gateway.sol:42</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>40 |     bytes32[] memory proof
+  41 | ) external {
+> 42 |     if (timestamp + DELAY > block.timestamp) revert EarlyWithdrawal();
+  43 |
+  44 |     bytes32 leaf = keccak256(abi.encode(nonce, l2Sender, target, timestamp, message));</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Using `block.timestamp` or `block.number` for critical logic can allow miners or bots to front-run transactions by manipulating the block parameters or ordering.</p>
+
+        <div class="label">Impact</div>
+        <p>Attackers can exploit front-running to gain unfair advantage, e.g., by seeing a pending trade and inserting their own transaction first.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Add slippage protection and, where ordering matters, commit reveal.
+function swap(uint amountIn, uint minAmountOut, uint deadline) external {
+    require(block.timestamp <= deadline, "Expired");
+    uint amountOut = _swap(amountIn);
+    require(amountOut >= minAmountOut, "Slippage exceeded");
+}
+
+// Commit reveal for order sensitive actions:
+// 1. commit(keccak256(abi.encode(value, salt)))
+// 2. later reveal(value, salt) and verify the stored hash.
+// Consider private mempools or batch auctions to remove ordering advantage.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F022: Potential front-running via block.timestamp/number <span class="badge low">Low</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/abi-smuggling/SelfAuthorizedVault.sol:13</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>11 | uint256 public constant WAITING_PERIOD = 15 days;
+  12 |
+> 13 | uint256 private _lastWithdrawalTimestamp = block.timestamp;
+  14 |
+  15 | error TargetNotAllowed();</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Using `block.timestamp` or `block.number` for critical logic can allow miners or bots to front-run transactions by manipulating the block parameters or ordering.</p>
+
+        <div class="label">Impact</div>
+        <p>Attackers can exploit front-running to gain unfair advantage, e.g., by seeing a pending trade and inserting their own transaction first.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Add slippage protection and, where ordering matters, commit reveal.
+function swap(uint amountIn, uint minAmountOut, uint deadline) external {
+    require(block.timestamp <= deadline, "Expired");
+    uint amountOut = _swap(amountIn);
+    require(amountOut >= minAmountOut, "Slippage exceeded");
+}
+
+// Commit reveal for order sensitive actions:
+// 1. commit(keccak256(abi.encode(value, salt)))
+// 2. later reveal(value, salt) and verify the stored hash.
+// Consider private mempools or batch auctions to remove ordering advantage.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F023: Potential front-running via block.timestamp/number <span class="badge low">Low</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/selfie/SimpleGovernance.sol:41</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>39 | target: target,
+  40 | value: value,
+> 41 | proposedAt: uint64(block.timestamp),
+  42 | executedAt: 0,
+  43 | data: data</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Using `block.timestamp` or `block.number` for critical logic can allow miners or bots to front-run transactions by manipulating the block parameters or ordering.</p>
+
+        <div class="label">Impact</div>
+        <p>Attackers can exploit front-running to gain unfair advantage, e.g., by seeing a pending trade and inserting their own transaction first.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Add slippage protection and, where ordering matters, commit reveal.
+function swap(uint amountIn, uint minAmountOut, uint deadline) external {
+    require(block.timestamp <= deadline, "Expired");
+    uint amountOut = _swap(amountIn);
+    require(amountOut >= minAmountOut, "Slippage exceeded");
+}
+
+// Commit reveal for order sensitive actions:
+// 1. commit(keccak256(abi.encode(value, salt)))
+// 2. later reveal(value, salt) and verify the stored hash.
+// Consider private mempools or batch auctions to remove ordering advantage.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F024: Potential front-running via block.timestamp/number <span class="badge low">Low</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/unstoppable/UnstoppableVault.sol:23</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>21 | uint64 public constant GRACE_PERIOD = 30 days;
+  22 |
+> 23 | uint64 public immutable end = uint64(block.timestamp) + GRACE_PERIOD;
+  24 |
+  25 | address public feeRecipient;</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Using `block.timestamp` or `block.number` for critical logic can allow miners or bots to front-run transactions by manipulating the block parameters or ordering.</p>
+
+        <div class="label">Impact</div>
+        <p>Attackers can exploit front-running to gain unfair advantage, e.g., by seeing a pending trade and inserting their own transaction first.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Add slippage protection and, where ordering matters, commit reveal.
+function swap(uint amountIn, uint minAmountOut, uint deadline) external {
+    require(block.timestamp <= deadline, "Expired");
+    uint amountOut = _swap(amountIn);
+    require(amountOut >= minAmountOut, "Slippage exceeded");
+}
+
+// Commit reveal for order sensitive actions:
+// 1. commit(keccak256(abi.encode(value, salt)))
+// 2. later reveal(value, salt) and verify the stored hash.
+// Consider private mempools or batch auctions to remove ordering advantage.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F025: Potential front-running via block.timestamp/number <span class="badge low">Low</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/puppet-v2/PuppetV2Pool.sol:47</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>45 |     require(_token.transfer(msg.sender, borrowAmount), "Transfer failed");
+  46 |
+> 47 |     emit Borrowed(msg.sender, amount, borrowAmount, block.timestamp);
+  48 | }
+  49 |</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Using `block.timestamp` or `block.number` for critical logic can allow miners or bots to front-run transactions by manipulating the block parameters or ordering.</p>
+
+        <div class="label">Impact</div>
+        <p>Attackers can exploit front-running to gain unfair advantage, e.g., by seeing a pending trade and inserting their own transaction first.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Add slippage protection and, where ordering matters, commit reveal.
+function swap(uint amountIn, uint minAmountOut, uint deadline) external {
+    require(block.timestamp <= deadline, "Expired");
+    uint amountOut = _swap(amountIn);
+    require(amountOut >= minAmountOut, "Slippage exceeded");
+}
+
+// Commit reveal for order sensitive actions:
+// 1. commit(keccak256(abi.encode(value, salt)))
+// 2. later reveal(value, salt) and verify the stored hash.
+// Consider private mempools or batch auctions to remove ordering advantage.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F026: Potential front-running via block.timestamp/number <span class="badge low">Low</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/naive-receiver/BasicForwarder.sol:46</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>44 | function _checkRequest(Request calldata request, bytes calldata signature) private view {
+  45 |     if (request.value != msg.value) revert InvalidValue();
+> 46 |     if (block.timestamp > request.deadline) revert OldRequest();
+  47 |     if (nonces[request.from] != request.nonce) revert InvalidNonce();
+  48 |</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Using `block.timestamp` or `block.number` for critical logic can allow miners or bots to front-run transactions by manipulating the block parameters or ordering.</p>
+
+        <div class="label">Impact</div>
+        <p>Attackers can exploit front-running to gain unfair advantage, e.g., by seeing a pending trade and inserting their own transaction first.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Add slippage protection and, where ordering matters, commit reveal.
+function swap(uint amountIn, uint minAmountOut, uint deadline) external {
+    require(block.timestamp <= deadline, "Expired");
+    uint amountOut = _swap(amountIn);
+    require(amountOut >= minAmountOut, "Slippage exceeded");
+}
+
+// Commit reveal for order sensitive actions:
+// 1. commit(keccak256(abi.encode(value, salt)))
+// 2. later reveal(value, salt) and verify the stored hash.
+// Consider private mempools or batch auctions to remove ordering advantage.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F027: Potential gas griefing (unbounded loop) <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/free-rider/FreeRiderNFTMarketplace.sol:84</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>82 |
+  83 | function buyMany(uint256[] calldata tokenIds) external payable nonReentrant {
+> 84 |     for (uint256 i = 0; i < tokenIds.length; ++i) {
+  85 |         unchecked {
+  86 |             _buyOne(tokenIds[i]);</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>If a contract performs operations that cost gas proportional to user-supplied data (e.g., iterating over an array), an attacker can cause the transaction to run out of gas or cost the victim a lot of gas.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker can grief users by making their transactions fail or become extremely expensive, effectively blocking them.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Limit loop iterations
+uint maxIterations = 100;
+for (uint i = 0; i < array.length && i < maxIterations; i++) {
+    // process
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F028: Potential gas griefing (unbounded loop) <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/shards/ShardsNFTMarketplace.sol:205</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>203 | uint256 payment;
+  204 |
+> 205 | for (uint256 i = 0; i < _purchases.length; i++) {
+  206 |     Purchase memory purchase = _purchases[i];
+  207 |     if (purchase.cancelled) continue;</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>If a contract performs operations that cost gas proportional to user-supplied data (e.g., iterating over an array), an attacker can cause the transaction to run out of gas or cost the victim a lot of gas.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker can grief users by making their transactions fail or become extremely expensive, effectively blocking them.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Limit loop iterations
+uint maxIterations = 100;
+for (uint i = 0; i < array.length && i < maxIterations; i++) {
+    // process
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F029: Potential gas griefing (unbounded loop) <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/wallet-mining/AuthorizerUpgradeable.sol:17</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>15 | function init(address[] memory _wards, address[] memory _aims) external {
+  16 |     require(needsInit != 0, "cannot init");
+> 17 |     for (uint256 i = 0; i < _wards.length; i++) {
+  18 |         _rely(_wards[i], _aims[i]);
+  19 |     }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>If a contract performs operations that cost gas proportional to user-supplied data (e.g., iterating over an array), an attacker can cause the transaction to run out of gas or cost the victim a lot of gas.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker can grief users by making their transactions fail or become extremely expensive, effectively blocking them.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Limit loop iterations
+uint maxIterations = 100;
+for (uint i = 0; i < array.length && i < maxIterations; i++) {
+    // process
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F030: Potential gas griefing (unbounded loop) <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/climber/ClimberTimelock.sol:90</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>88 | bytes32 id = getOperationId(targets, values, dataElements, salt);
+  89 |
+> 90 | for (uint8 i = 0; i < targets.length; ++i) {
+  91 |     targets[i].functionCallWithValue(dataElements[i], values[i]);
+  92 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>If a contract performs operations that cost gas proportional to user-supplied data (e.g., iterating over an array), an attacker can cause the transaction to run out of gas or cost the victim a lot of gas.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker can grief users by making their transactions fail or become extremely expensive, effectively blocking them.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Limit loop iterations
+uint maxIterations = 100;
+for (uint i = 0; i < array.length && i < maxIterations; i++) {
+    // process
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F031: Potential gas griefing (unbounded loop) <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/abi-smuggling/AuthorizedExecutor.sol:30</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>28 | }
+  29 |
+> 30 | for (uint256 i = 0; i < ids.length;) {
+  31 |     unchecked {
+  32 |         permissions[ids[i]] = true;</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>If a contract performs operations that cost gas proportional to user-supplied data (e.g., iterating over an array), an attacker can cause the transaction to run out of gas or cost the victim a lot of gas.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker can grief users by making their transactions fail or become extremely expensive, effectively blocking them.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Limit loop iterations
+uint maxIterations = 100;
+for (uint i = 0; i < array.length && i < maxIterations; i++) {
+    // process
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F032: Potential gas griefing (unbounded loop) <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/the-rewarder/TheRewarderDistributor.sol:72</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>70 |
+  71 | function clean(IERC20[] calldata tokens) external {
+> 72 |     for (uint256 i = 0; i < tokens.length; i++) {
+  73 |         IERC20 token = tokens[i];
+  74 |         if (distributions[token].remaining == 0) {</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>If a contract performs operations that cost gas proportional to user-supplied data (e.g., iterating over an array), an attacker can cause the transaction to run out of gas or cost the victim a lot of gas.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker can grief users by making their transactions fail or become extremely expensive, effectively blocking them.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Limit loop iterations
+uint maxIterations = 100;
+for (uint i = 0; i < array.length && i < maxIterations; i++) {
+    // process
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F033: Potential gas griefing (unbounded loop) <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/the-rewarder/TheRewarderDistributor.sol:87</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>85 | uint256 amount;
+  86 |
+> 87 | for (uint256 i = 0; i < inputClaims.length; i++) {
+  88 |     inputClaim = inputClaims[i];
+  89 |</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>If a contract performs operations that cost gas proportional to user-supplied data (e.g., iterating over an array), an attacker can cause the transaction to run out of gas or cost the victim a lot of gas.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker can grief users by making their transactions fail or become extremely expensive, effectively blocking them.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Limit loop iterations
+uint maxIterations = 100;
+for (uint i = 0; i < array.length && i < maxIterations; i++) {
+    // process
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F034: Potential gas griefing (unbounded loop) <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/puppet-v2/UniswapV2Library.sol:91</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>89 | amounts = new uint256[](path.length);
+  90 | amounts[0] = amountIn;
+> 91 | for (uint256 i; i < path.length - 1; i++) {
+  92 |     (uint256 reserveIn, uint256 reserveOut) = getReserves(factory, path[i], path[i + 1]);
+  93 |     amounts[i + 1] = getAmountOut(amounts[i], reserveIn, reserveOut);</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>If a contract performs operations that cost gas proportional to user-supplied data (e.g., iterating over an array), an attacker can cause the transaction to run out of gas or cost the victim a lot of gas.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker can grief users by making their transactions fail or become extremely expensive, effectively blocking them.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Limit loop iterations
+uint maxIterations = 100;
+for (uint i = 0; i < array.length && i < maxIterations; i++) {
+    // process
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F035: Potential gas griefing (unbounded loop) <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/puppet-v2/UniswapV2Library.sol:106</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>104 | amounts = new uint256[](path.length);
+  105 | amounts[amounts.length - 1] = amountOut;
+> 106 | for (uint256 i = path.length - 1; i > 0; i--) {
+  107 |     (uint256 reserveIn, uint256 reserveOut) = getReserves(factory, path[i - 1], path[i]);
+  108 |     amounts[i - 1] = getAmountIn(amounts[i], reserveIn, reserveOut);</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>If a contract performs operations that cost gas proportional to user-supplied data (e.g., iterating over an array), an attacker can cause the transaction to run out of gas or cost the victim a lot of gas.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker can grief users by making their transactions fail or become extremely expensive, effectively blocking them.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Limit loop iterations
+uint maxIterations = 100;
+for (uint i = 0; i < array.length && i < maxIterations; i++) {
+    // process
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F036: Potential gas griefing (unbounded loop) <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/backdoor/WalletRegistry.sol:52</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>50 | token = IERC20(tokenAddress);
+  51 |
+> 52 | for (uint256 i = 0; i < initialBeneficiaries.length; ++i) {
+  53 |     unchecked {
+  54 |         beneficiaries[initialBeneficiaries[i]] = true;</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>If a contract performs operations that cost gas proportional to user-supplied data (e.g., iterating over an array), an attacker can cause the transaction to run out of gas or cost the victim a lot of gas.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker can grief users by making their transactions fail or become extremely expensive, effectively blocking them.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Limit loop iterations
+uint maxIterations = 100;
+for (uint i = 0; i < array.length && i < maxIterations; i++) {
+    // process
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F037: Potential gas griefing (unbounded loop) <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/naive-receiver/Multicall.sol:11</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>9 | function multicall(bytes[] calldata data) external virtual returns (bytes[] memory results) {
+  10 |     results = new bytes[](data.length);
+> 11 |     for (uint256 i = 0; i < data.length; i++) {
+  12 |         results[i] = Address.functionDelegateCall(address(this), data[i]);
+  13 |     }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>If a contract performs operations that cost gas proportional to user-supplied data (e.g., iterating over an array), an attacker can cause the transaction to run out of gas or cost the victim a lot of gas.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker can grief users by making their transactions fail or become extremely expensive, effectively blocking them.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Limit loop iterations
+uint maxIterations = 100;
+for (uint i = 0; i < array.length && i < maxIterations; i++) {
+    // process
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F038: Potential gas griefing (unbounded loop) <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/compromised/TrustfulOracle.sol:28</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>26 |     revert NotEnoughSources();
+  27 | }
+> 28 | for (uint256 i = 0; i < sources.length;) {
+  29 |     unchecked {
+  30 |         _grantRole(TRUSTED_SOURCE_ROLE, sources[i]);</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>If a contract performs operations that cost gas proportional to user-supplied data (e.g., iterating over an array), an attacker can cause the transaction to run out of gas or cost the victim a lot of gas.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker can grief users by making their transactions fail or become extremely expensive, effectively blocking them.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Limit loop iterations
+uint maxIterations = 100;
+for (uint i = 0; i < array.length && i < maxIterations; i++) {
+    // process
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F039: Potential gas griefing (unbounded loop) <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/compromised/TrustfulOracle.sol:46</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>44 | // Only allow one (symbol, price) per source
+  45 | require(sources.length == symbols.length && symbols.length == prices.length);
+> 46 | for (uint256 i = 0; i < sources.length;) {
+  47 |     unchecked {
+  48 |         _setPrice(sources[i], symbols[i], prices[i]);</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>If a contract performs operations that cost gas proportional to user-supplied data (e.g., iterating over an array), an attacker can cause the transaction to run out of gas or cost the victim a lot of gas.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker can grief users by making their transactions fail or become extremely expensive, effectively blocking them.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Limit loop iterations
+uint maxIterations = 100;
+for (uint i = 0; i < array.length && i < maxIterations; i++) {
+    // process
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F040: Inline assembly used <span class="badge info">Info</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/free-rider/FreeRiderNFTMarketplace.sol:75</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>73 | offers[tokenId] = price;
+  74 |
+> 75 | assembly {
+  76 |     // gas savings
+  77 |     sstore(0x02, add(sload(0x02), 0x01))</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>The contract contains an inline `assembly` block. Assembly bypasses Solidity's type system, overflow checks and memory-safety guarantees, so any mistake inside the block goes undetected by the compiler.</p>
+
+        <div class="label">Impact</div>
+        <p>Errors in hand-written assembly (wrong memory offsets, missing checks, unchecked external call results) can corrupt state or leak funds without any compiler warning. This is informational; assembly is often legitimate.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Prefer high-level Solidity where possible. If assembly is required, keep the block minimal, mark it `memory-safe` when applicable, document the invariants it relies on, and cover it with targeted tests.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F041: Inline assembly used <span class="badge info">Info</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/wallet-mining/WalletDeployer.sol:64</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>62 |
+  63 | function can(address u, address a) public view returns (bool y) {
+> 64 |     assembly {
+  65 |         let m := sload(0)
+  66 |         if iszero(extcodesize(m)) { stop() }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>The contract contains an inline `assembly` block. Assembly bypasses Solidity's type system, overflow checks and memory-safety guarantees, so any mistake inside the block goes undetected by the compiler.</p>
+
+        <div class="label">Impact</div>
+        <p>Errors in hand-written assembly (wrong memory offsets, missing checks, unchecked external call results) can corrupt state or leak funds without any compiler warning. This is informational; assembly is often legitimate.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Prefer high-level Solidity where possible. If assembly is required, keep the block minimal, mark it `memory-safe` when applicable, document the invariants it relies on, and cover it with targeted tests.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F042: Inline assembly used <span class="badge info">Info</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/withdrawal/L1Gateway.sol:64</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>62 | xSender = l2Sender;
+  63 | bool success;
+> 64 | assembly {
+  65 |     success := call(gas(), target, 0, add(message, 0x20), mload(message), 0, 0) // call with 0 value. Don't copy returndata.
+  66 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>The contract contains an inline `assembly` block. Assembly bypasses Solidity's type system, overflow checks and memory-safety guarantees, so any mistake inside the block goes undetected by the compiler.</p>
+
+        <div class="label">Impact</div>
+        <p>Errors in hand-written assembly (wrong memory offsets, missing checks, unchecked external call results) can corrupt state or leak funds without any compiler warning. This is informational; assembly is often legitimate.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Prefer high-level Solidity where possible. If assembly is required, keep the block minimal, mark it `memory-safe` when applicable, document the invariants it relies on, and cover it with targeted tests.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F043: Inline assembly used <span class="badge info">Info</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/withdrawal/L1Forwarder.sol:61</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>59 | context = Context({l2Sender: l2Sender});
+  60 | bool success;
+> 61 | assembly {
+  62 |     success := call(gas(), target, 0, add(message, 0x20), mload(message), 0, 0) // call with 0 value. Don't copy returndata.
+  63 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>The contract contains an inline `assembly` block. Assembly bypasses Solidity's type system, overflow checks and memory-safety guarantees, so any mistake inside the block goes undetected by the compiler.</p>
+
+        <div class="label">Impact</div>
+        <p>Errors in hand-written assembly (wrong memory offsets, missing checks, unchecked external call results) can corrupt state or leak funds without any compiler warning. This is informational; assembly is often legitimate.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Prefer high-level Solidity where possible. If assembly is required, keep the block minimal, mark it `memory-safe` when applicable, document the invariants it relies on, and cover it with targeted tests.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F044: Inline assembly used <span class="badge info">Info</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/abi-smuggling/AuthorizedExecutor.sol:50</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>48 | bytes4 selector;
+  49 | uint256 calldataOffset = 4 + 32 * 3; // calldata position where `actionData` begins
+> 50 | assembly {
+  51 |     selector := calldataload(calldataOffset)
+  52 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>The contract contains an inline `assembly` block. Assembly bypasses Solidity's type system, overflow checks and memory-safety guarantees, so any mistake inside the block goes undetected by the compiler.</p>
+
+        <div class="label">Impact</div>
+        <p>Errors in hand-written assembly (wrong memory offsets, missing checks, unchecked external call results) can corrupt state or leak funds without any compiler warning. This is informational; assembly is often legitimate.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Prefer high-level Solidity where possible. If assembly is required, keep the block minimal, mark it `memory-safe` when applicable, document the invariants it relies on, and cover it with targeted tests.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F045: Inline assembly used <span class="badge info">Info</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/naive-receiver/BasicForwarder.sol:65</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>63 | bytes memory payload = abi.encodePacked(request.data, request.from);
+  64 | uint256 forwardGas = request.gas;
+> 65 | assembly {
+  66 |     success := call(forwardGas, target, value, add(payload, 0x20), mload(payload), 0, 0) // don't copy returndata
+  67 |     gasLeft := gas()</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>The contract contains an inline `assembly` block. Assembly bypasses Solidity's type system, overflow checks and memory-safety guarantees, so any mistake inside the block goes undetected by the compiler.</p>
+
+        <div class="label">Impact</div>
+        <p>Errors in hand-written assembly (wrong memory offsets, missing checks, unchecked external call results) can corrupt state or leak funds without any compiler warning. This is informational; assembly is often legitimate.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Prefer high-level Solidity where possible. If assembly is required, keep the block minimal, mark it `memory-safe` when applicable, document the invariants it relies on, and cover it with targeted tests.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F046: Inline assembly used <span class="badge info">Info</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/naive-receiver/BasicForwarder.sol:71</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>69 |
+  70 | if (gasLeft < request.gas / 63) {
+> 71 |     assembly {
+  72 |         invalid()
+  73 |     }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>The contract contains an inline `assembly` block. Assembly bypasses Solidity's type system, overflow checks and memory-safety guarantees, so any mistake inside the block goes undetected by the compiler.</p>
+
+        <div class="label">Impact</div>
+        <p>Errors in hand-written assembly (wrong memory offsets, missing checks, unchecked external call results) can corrupt state or leak funds without any compiler warning. This is informational; assembly is often legitimate.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Prefer high-level Solidity where possible. If assembly is required, keep the block minimal, mark it `memory-safe` when applicable, document the invariants it relies on, and cover it with targeted tests.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F047: Inline assembly used <span class="badge info">Info</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/naive-receiver/FlashLoanReceiver.sol:19</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>17 |     returns (bytes32)
+  18 | {
+> 19 |     assembly {
+  20 |         // gas savings
+  21 |         if iszero(eq(sload(pool.slot), caller())) {</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>The contract contains an inline `assembly` block. Assembly bypasses Solidity's type system, overflow checks and memory-safety guarantees, so any mistake inside the block goes undetected by the compiler.</p>
+
+        <div class="label">Impact</div>
+        <p>Errors in hand-written assembly (wrong memory offsets, missing checks, unchecked external call results) can corrupt state or leak funds without any compiler warning. This is informational; assembly is often legitimate.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Prefer high-level Solidity where possible. If assembly is required, keep the block minimal, mark it `memory-safe` when applicable, document the invariants it relies on, and cover it with targeted tests.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F048: Possible missing input validation <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/DamnValuableStaking.sol:92</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>90 |
+  91 |     function earned(address staker) public view returns (uint256) {
+> 92 |         return balanceOf[staker] * (rewardsPerToken() - stakerRewardPerToken[staker]) / 1e18 + rewards[staker];
+  93 |     }
+  94 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>User-supplied inputs should be validated to prevent out-of-bounds errors, integer overflows, or unexpected behavior. Missing checks can lead to vulnerabilities like underflows or access to invalid indices.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could supply values that cause array index errors, arithmetic issues, or bypass logic.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>require(index < array.length, "Index out of bounds");
+require(amount > 0, "Amount must be positive");</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F049: Possible missing input validation <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/free-rider/FreeRiderNFTMarketplace.sol:53</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>51 | for (uint256 i = 0; i < amount; ++i) {
+  52 |     unchecked {
+> 53 |         _offerOne(tokenIds[i], prices[i]);
+  54 |     }
+  55 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>User-supplied inputs should be validated to prevent out-of-bounds errors, integer overflows, or unexpected behavior. Missing checks can lead to vulnerabilities like underflows or access to invalid indices.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could supply values that cause array index errors, arithmetic issues, or bypass logic.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>require(index < array.length, "Index out of bounds");
+require(amount > 0, "Amount must be positive");</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F050: Possible missing input validation <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/free-rider/FreeRiderNFTMarketplace.sol:53</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>51 | for (uint256 i = 0; i < amount; ++i) {
+  52 |     unchecked {
+> 53 |         _offerOne(tokenIds[i], prices[i]);
+  54 |     }
+  55 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>User-supplied inputs should be validated to prevent out-of-bounds errors, integer overflows, or unexpected behavior. Missing checks can lead to vulnerabilities like underflows or access to invalid indices.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could supply values that cause array index errors, arithmetic issues, or bypass logic.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>require(index < array.length, "Index out of bounds");
+require(amount > 0, "Amount must be positive");</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F051: Possible missing input validation <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/shards/ShardsNFTMarketplace.sol:206</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>204 |
+  205 | for (uint256 i = 0; i < _purchases.length; i++) {
+> 206 |     Purchase memory purchase = _purchases[i];
+  207 |     if (purchase.cancelled) continue;
+  208 |     payment += purchase.shards.mulWadUp(purchase.rate);</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>User-supplied inputs should be validated to prevent out-of-bounds errors, integer overflows, or unexpected behavior. Missing checks can lead to vulnerabilities like underflows or access to invalid indices.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could supply values that cause array index errors, arithmetic issues, or bypass logic.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>require(index < array.length, "Index out of bounds");
+require(amount > 0, "Amount must be positive");</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F052: Possible missing input validation <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/wallet-mining/AuthorizerUpgradeable.sol:18</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>16 | require(needsInit != 0, "cannot init");
+  17 | for (uint256 i = 0; i < _wards.length; i++) {
+> 18 |     _rely(_wards[i], _aims[i]);
+  19 | }
+  20 | needsInit = 0;</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>User-supplied inputs should be validated to prevent out-of-bounds errors, integer overflows, or unexpected behavior. Missing checks can lead to vulnerabilities like underflows or access to invalid indices.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could supply values that cause array index errors, arithmetic issues, or bypass logic.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>require(index < array.length, "Index out of bounds");
+require(amount > 0, "Amount must be positive");</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F053: Possible missing input validation <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/wallet-mining/AuthorizerUpgradeable.sol:18</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>16 | require(needsInit != 0, "cannot init");
+  17 | for (uint256 i = 0; i < _wards.length; i++) {
+> 18 |     _rely(_wards[i], _aims[i]);
+  19 | }
+  20 | needsInit = 0;</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>User-supplied inputs should be validated to prevent out-of-bounds errors, integer overflows, or unexpected behavior. Missing checks can lead to vulnerabilities like underflows or access to invalid indices.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could supply values that cause array index errors, arithmetic issues, or bypass logic.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>require(index < array.length, "Index out of bounds");
+require(amount > 0, "Amount must be positive");</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F054: Possible missing input validation <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/climber/ClimberTimelock.sol:91</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>89 |
+  90 | for (uint8 i = 0; i < targets.length; ++i) {
+> 91 |     targets[i].functionCallWithValue(dataElements[i], values[i]);
+  92 | }
+  93 |</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>User-supplied inputs should be validated to prevent out-of-bounds errors, integer overflows, or unexpected behavior. Missing checks can lead to vulnerabilities like underflows or access to invalid indices.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could supply values that cause array index errors, arithmetic issues, or bypass logic.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>require(index < array.length, "Index out of bounds");
+require(amount > 0, "Amount must be positive");</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F055: Possible missing input validation <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/climber/ClimberTimelock.sol:91</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>89 |
+  90 | for (uint8 i = 0; i < targets.length; ++i) {
+> 91 |     targets[i].functionCallWithValue(dataElements[i], values[i]);
+  92 | }
+  93 |</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>User-supplied inputs should be validated to prevent out-of-bounds errors, integer overflows, or unexpected behavior. Missing checks can lead to vulnerabilities like underflows or access to invalid indices.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could supply values that cause array index errors, arithmetic issues, or bypass logic.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>require(index < array.length, "Index out of bounds");
+require(amount > 0, "Amount must be positive");</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F056: Possible missing input validation <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/climber/ClimberTimelock.sol:91</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>89 |
+  90 | for (uint8 i = 0; i < targets.length; ++i) {
+> 91 |     targets[i].functionCallWithValue(dataElements[i], values[i]);
+  92 | }
+  93 |</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>User-supplied inputs should be validated to prevent out-of-bounds errors, integer overflows, or unexpected behavior. Missing checks can lead to vulnerabilities like underflows or access to invalid indices.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could supply values that cause array index errors, arithmetic issues, or bypass logic.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>require(index < array.length, "Index out of bounds");
+require(amount > 0, "Amount must be positive");</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F057: Possible missing input validation <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/the-rewarder/TheRewarderDistributor.sol:73</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>71 | function clean(IERC20[] calldata tokens) external {
+  72 |     for (uint256 i = 0; i < tokens.length; i++) {
+> 73 |         IERC20 token = tokens[i];
+  74 |         if (distributions[token].remaining == 0) {
+  75 |             token.transfer(owner, token.balanceOf(address(this)));</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>User-supplied inputs should be validated to prevent out-of-bounds errors, integer overflows, or unexpected behavior. Missing checks can lead to vulnerabilities like underflows or access to invalid indices.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could supply values that cause array index errors, arithmetic issues, or bypass logic.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>require(index < array.length, "Index out of bounds");
+require(amount > 0, "Amount must be positive");</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F058: Possible missing input validation <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/the-rewarder/TheRewarderDistributor.sol:88</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>86 |
+  87 | for (uint256 i = 0; i < inputClaims.length; i++) {
+> 88 |     inputClaim = inputClaims[i];
+  89 |
+  90 |     uint256 wordPosition = inputClaim.batchNumber / 256;</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>User-supplied inputs should be validated to prevent out-of-bounds errors, integer overflows, or unexpected behavior. Missing checks can lead to vulnerabilities like underflows or access to invalid indices.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could supply values that cause array index errors, arithmetic issues, or bypass logic.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>require(index < array.length, "Index out of bounds");
+require(amount > 0, "Amount must be positive");</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F059: Possible missing input validation <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/puppet-v2/UniswapV2Library.sol:92</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>90 | amounts[0] = amountIn;
+  91 | for (uint256 i; i < path.length - 1; i++) {
+> 92 |     (uint256 reserveIn, uint256 reserveOut) = getReserves(factory, path[i], path[i + 1]);
+  93 |     amounts[i + 1] = getAmountOut(amounts[i], reserveIn, reserveOut);
+  94 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>User-supplied inputs should be validated to prevent out-of-bounds errors, integer overflows, or unexpected behavior. Missing checks can lead to vulnerabilities like underflows or access to invalid indices.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could supply values that cause array index errors, arithmetic issues, or bypass logic.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>require(index < array.length, "Index out of bounds");
+require(amount > 0, "Amount must be positive");</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F060: Possible missing input validation <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/puppet-v2/UniswapV2Library.sol:93</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>91 |     for (uint256 i; i < path.length - 1; i++) {
+  92 |         (uint256 reserveIn, uint256 reserveOut) = getReserves(factory, path[i], path[i + 1]);
+> 93 |         amounts[i + 1] = getAmountOut(amounts[i], reserveIn, reserveOut);
+  94 |     }
+  95 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>User-supplied inputs should be validated to prevent out-of-bounds errors, integer overflows, or unexpected behavior. Missing checks can lead to vulnerabilities like underflows or access to invalid indices.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could supply values that cause array index errors, arithmetic issues, or bypass logic.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>require(index < array.length, "Index out of bounds");
+require(amount > 0, "Amount must be positive");</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F061: Possible missing input validation <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/naive-receiver/Multicall.sol:12</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>10 | results = new bytes[](data.length);
+  11 | for (uint256 i = 0; i < data.length; i++) {
+> 12 |     results[i] = Address.functionDelegateCall(address(this), data[i]);
+  13 | }
+  14 | return results;</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>User-supplied inputs should be validated to prevent out-of-bounds errors, integer overflows, or unexpected behavior. Missing checks can lead to vulnerabilities like underflows or access to invalid indices.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could supply values that cause array index errors, arithmetic issues, or bypass logic.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>require(index < array.length, "Index out of bounds");
+require(amount > 0, "Amount must be positive");</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F062: Possible missing input validation <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/compromised/TrustfulOracle.sol:30</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>28 | for (uint256 i = 0; i < sources.length;) {
+  29 |     unchecked {
+> 30 |         _grantRole(TRUSTED_SOURCE_ROLE, sources[i]);
+  31 |         ++i;
+  32 |     }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>User-supplied inputs should be validated to prevent out-of-bounds errors, integer overflows, or unexpected behavior. Missing checks can lead to vulnerabilities like underflows or access to invalid indices.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could supply values that cause array index errors, arithmetic issues, or bypass logic.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>require(index < array.length, "Index out of bounds");
+require(amount > 0, "Amount must be positive");</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F063: Possible missing input validation <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/compromised/TrustfulOracle.sol:48</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>46 | for (uint256 i = 0; i < sources.length;) {
+  47 |     unchecked {
+> 48 |         _setPrice(sources[i], symbols[i], prices[i]);
+  49 |         ++i;
+  50 |     }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>User-supplied inputs should be validated to prevent out-of-bounds errors, integer overflows, or unexpected behavior. Missing checks can lead to vulnerabilities like underflows or access to invalid indices.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could supply values that cause array index errors, arithmetic issues, or bypass logic.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>require(index < array.length, "Index out of bounds");
+require(amount > 0, "Amount must be positive");</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F064: Possible missing input validation <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/compromised/TrustfulOracle.sol:48</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>46 | for (uint256 i = 0; i < sources.length;) {
+  47 |     unchecked {
+> 48 |         _setPrice(sources[i], symbols[i], prices[i]);
+  49 |         ++i;
+  50 |     }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>User-supplied inputs should be validated to prevent out-of-bounds errors, integer overflows, or unexpected behavior. Missing checks can lead to vulnerabilities like underflows or access to invalid indices.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could supply values that cause array index errors, arithmetic issues, or bypass logic.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>require(index < array.length, "Index out of bounds");
+require(amount > 0, "Amount must be positive");</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F065: Unchecked arithmetic may overflow <span class="badge critical">Critical</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/free-rider/FreeRiderNFTMarketplace.sol:34</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>32 | for (uint256 i = 0; i < amount;) {
+  33 |     _token.safeMint(msg.sender);
+> 34 |     unchecked {
+  35 |         ++i;
+  36 |     }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Arithmetic inside `unchecked` blocks bypasses Solidity's built-in overflow checks. If the values are unbounded, this can lead to integer overflow/underflow vulnerabilities.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker can manipulate arithmetic to cause unexpected behavior, such as inflating balances or breaking invariants.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>unchecked {
+    // Add explicit overflow check
+    require(x <= type(uint256).max - y, "overflow");
+    z = x + y;
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F066: Unchecked arithmetic may overflow <span class="badge critical">Critical</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/side-entrance/SideEntranceLenderPool.sol:20</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>18 |
+  19 | function deposit() external payable {
+> 20 |     unchecked {
+  21 |         balances[msg.sender] += msg.value;
+  22 |     }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Arithmetic inside `unchecked` blocks bypasses Solidity's built-in overflow checks. If the values are unbounded, this can lead to integer overflow/underflow vulnerabilities.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker can manipulate arithmetic to cause unexpected behavior, such as inflating balances or breaking invariants.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>unchecked {
+    // Add explicit overflow check
+    require(x <= type(uint256).max - y, "overflow");
+    z = x + y;
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F067: Unchecked arithmetic may overflow <span class="badge critical">Critical</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/withdrawal/L2MessageStore.sol:24</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>22 | emit MessageStored(id, nonce, msg.sender, target, block.timestamp, data);
+  23 |
+> 24 | unchecked {
+  25 |     nonce++;
+  26 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Arithmetic inside `unchecked` blocks bypasses Solidity's built-in overflow checks. If the values are unbounded, this can lead to integer overflow/underflow vulnerabilities.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker can manipulate arithmetic to cause unexpected behavior, such as inflating balances or breaking invariants.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>unchecked {
+    // Add explicit overflow check
+    require(x <= type(uint256).max - y, "overflow");
+    z = x + y;
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F068: Unchecked arithmetic may overflow <span class="badge critical">Critical</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/withdrawal/L2Handler.sol:28</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>26 | });
+  27 |
+> 28 | unchecked {
+  29 |     nonce++;
+  30 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Arithmetic inside `unchecked` blocks bypasses Solidity's built-in overflow checks. If the values are unbounded, this can lead to integer overflow/underflow vulnerabilities.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker can manipulate arithmetic to cause unexpected behavior, such as inflating balances or breaking invariants.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>unchecked {
+    // Add explicit overflow check
+    require(x <= type(uint256).max - y, "overflow");
+    z = x + y;
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F069: Unchecked arithmetic may overflow <span class="badge critical">Critical</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/abi-smuggling/AuthorizedExecutor.sol:31</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>29 |
+  30 | for (uint256 i = 0; i < ids.length;) {
+> 31 |     unchecked {
+  32 |         permissions[ids[i]] = true;
+  33 |         ++i;</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Arithmetic inside `unchecked` blocks bypasses Solidity's built-in overflow checks. If the values are unbounded, this can lead to integer overflow/underflow vulnerabilities.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker can manipulate arithmetic to cause unexpected behavior, such as inflating balances or breaking invariants.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>unchecked {
+    // Add explicit overflow check
+    require(x <= type(uint256).max - y, "overflow");
+    z = x + y;
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F070: Unchecked arithmetic may overflow <span class="badge critical">Critical</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/puppet/PuppetPool.sol:38</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>36 |
+  37 | if (msg.value > depositRequired) {
+> 38 |     unchecked {
+  39 |         payable(msg.sender).sendValue(msg.value - depositRequired);
+  40 |     }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Arithmetic inside `unchecked` blocks bypasses Solidity's built-in overflow checks. If the values are unbounded, this can lead to integer overflow/underflow vulnerabilities.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker can manipulate arithmetic to cause unexpected behavior, such as inflating balances or breaking invariants.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>unchecked {
+    // Add explicit overflow check
+    require(x <= type(uint256).max - y, "overflow");
+    z = x + y;
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F071: Unchecked arithmetic may overflow <span class="badge critical">Critical</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/puppet/PuppetPool.sol:43</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>41 | }
+  42 |
+> 43 | unchecked {
+  44 |     deposits[msg.sender] += depositRequired;
+  45 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Arithmetic inside `unchecked` blocks bypasses Solidity's built-in overflow checks. If the values are unbounded, this can lead to integer overflow/underflow vulnerabilities.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker can manipulate arithmetic to cause unexpected behavior, such as inflating balances or breaking invariants.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>unchecked {
+    // Add explicit overflow check
+    require(x <= type(uint256).max - y, "overflow");
+    z = x + y;
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F072: Unchecked arithmetic may overflow <span class="badge critical">Critical</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/selfie/SimpleGovernance.sol:46</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>44 | });
+  45 |
+> 46 | unchecked {
+  47 |     _actionCounter++;
+  48 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Arithmetic inside `unchecked` blocks bypasses Solidity's built-in overflow checks. If the values are unbounded, this can lead to integer overflow/underflow vulnerabilities.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker can manipulate arithmetic to cause unexpected behavior, such as inflating balances or breaking invariants.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>unchecked {
+    // Add explicit overflow check
+    require(x <= type(uint256).max - y, "overflow");
+    z = x + y;
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F073: Unchecked arithmetic may overflow <span class="badge critical">Critical</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/selfie/SimpleGovernance.sol:93</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>91 |
+  92 | uint64 timeDelta;
+> 93 | unchecked {
+  94 |     timeDelta = uint64(block.timestamp) - actionToExecute.proposedAt;
+  95 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Arithmetic inside `unchecked` blocks bypasses Solidity's built-in overflow checks. If the values are unbounded, this can lead to integer overflow/underflow vulnerabilities.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker can manipulate arithmetic to cause unexpected behavior, such as inflating balances or breaking invariants.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>unchecked {
+    // Add explicit overflow check
+    require(x <= type(uint256).max - y, "overflow");
+    z = x + y;
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F074: Unchecked arithmetic may overflow <span class="badge critical">Critical</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/naive-receiver/FlashLoanReceiver.sol:30</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>28 |
+  29 | uint256 amountToBeRepaid;
+> 30 | unchecked {
+  31 |     amountToBeRepaid = amount + fee;
+  32 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Arithmetic inside `unchecked` blocks bypasses Solidity's built-in overflow checks. If the values are unbounded, this can lead to integer overflow/underflow vulnerabilities.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker can manipulate arithmetic to cause unexpected behavior, such as inflating balances or breaking invariants.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>unchecked {
+    // Add explicit overflow check
+    require(x <= type(uint256).max - y, "overflow");
+    z = x + y;
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F075: Unchecked arithmetic may overflow <span class="badge critical">Critical</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/compromised/Exchange.sol:42</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>40 |
+  41 | id = token.safeMint(msg.sender);
+> 42 | unchecked {
+  43 |     payable(msg.sender).sendValue(msg.value - price);
+  44 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Arithmetic inside `unchecked` blocks bypasses Solidity's built-in overflow checks. If the values are unbounded, this can lead to integer overflow/underflow vulnerabilities.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker can manipulate arithmetic to cause unexpected behavior, such as inflating balances or breaking invariants.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>unchecked {
+    // Add explicit overflow check
+    require(x <= type(uint256).max - y, "overflow");
+    z = x + y;
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F076: Unchecked arithmetic may overflow <span class="badge critical">Critical</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/compromised/TrustfulOracle.sol:29</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>27 | }
+  28 | for (uint256 i = 0; i < sources.length;) {
+> 29 |     unchecked {
+  30 |         _grantRole(TRUSTED_SOURCE_ROLE, sources[i]);
+  31 |         ++i;</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Arithmetic inside `unchecked` blocks bypasses Solidity's built-in overflow checks. If the values are unbounded, this can lead to integer overflow/underflow vulnerabilities.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker can manipulate arithmetic to cause unexpected behavior, such as inflating balances or breaking invariants.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>unchecked {
+    // Add explicit overflow check
+    require(x <= type(uint256).max - y, "overflow");
+    z = x + y;
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F077: Unchecked arithmetic may overflow <span class="badge critical">Critical</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/compromised/TrustfulOracle.sol:47</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>45 | require(sources.length == symbols.length && symbols.length == prices.length);
+  46 | for (uint256 i = 0; i < sources.length;) {
+> 47 |     unchecked {
+  48 |         _setPrice(sources[i], symbols[i], prices[i]);
+  49 |         ++i;</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Arithmetic inside `unchecked` blocks bypasses Solidity's built-in overflow checks. If the values are unbounded, this can lead to integer overflow/underflow vulnerabilities.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker can manipulate arithmetic to cause unexpected behavior, such as inflating balances or breaking invariants.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>unchecked {
+    // Add explicit overflow check
+    require(x <= type(uint256).max - y, "overflow");
+    z = x + y;
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F078: Unchecked arithmetic may overflow <span class="badge critical">Critical</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/compromised/TrustfulOracle.sol:69</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>67 | address source = getRoleMember(TRUSTED_SOURCE_ROLE, i);
+  68 | prices[i] = getPriceBySource(symbol, source);
+> 69 | unchecked {
+  70 |     ++i;
+  71 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Arithmetic inside `unchecked` blocks bypasses Solidity's built-in overflow checks. If the values are unbounded, this can lead to integer overflow/underflow vulnerabilities.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker can manipulate arithmetic to cause unexpected behavior, such as inflating balances or breaking invariants.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>unchecked {
+    // Add explicit overflow check
+    require(x <= type(uint256).max - y, "overflow");
+    z = x + y;
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F079: Ether can be locked in contract <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/free-rider/FreeRiderNFTMarketplace.sol:9</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>7 | import {DamnValuableNFT} from "../DamnValuableNFT.sol";
+   8 |
+>  9 | contract FreeRiderNFTMarketplace is ReentrancyGuard {
+  10 |     using Address for address payable;
+  11 |</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>The contract accepts ether (via `receive()`, a payable `fallback`, or a payable function) but defines no code path that can ever move ether out - no `.transfer`/`.send`, no `{value: ...}` call, no `selfdestruct`. Every wei sent to it becomes permanently unrecoverable.</p>
+
+        <div class="label">Impact</div>
+        <p>User or protocol funds sent to the contract are irreversibly frozen. There is no owner rescue, no upgrade hook, and no way to recover the balance short of redeploying and migrating.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Either remove the payable entry points if the contract is not meant to hold ether, or add an explicit withdrawal path, e.g. an access-controlled `function withdraw(address payable to) external onlyOwner { to.transfer(address(this).balance); }`.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F080: Ether can be locked in contract <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/climber/ClimberTimelock.sol:22</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>20 |  * @author
+  21 |  */
+> 22 | contract ClimberTimelock is ClimberTimelockBase {
+  23 |     using Address for address;
+  24 |</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>The contract accepts ether (via `receive()`, a payable `fallback`, or a payable function) but defines no code path that can ever move ether out - no `.transfer`/`.send`, no `{value: ...}` call, no `selfdestruct`. Every wei sent to it becomes permanently unrecoverable.</p>
+
+        <div class="label">Impact</div>
+        <p>User or protocol funds sent to the contract are irreversibly frozen. There is no owner rescue, no upgrade hook, and no way to recover the balance short of redeploying and migrating.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Either remove the payable entry points if the contract is not meant to hold ether, or add an explicit withdrawal path, e.g. an access-controlled `function withdraw(address payable to) external onlyOwner { to.transfer(address(this).balance); }`.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F081: Ether can be locked in contract <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/withdrawal/L1Forwarder.sol:10</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>8 | import {L1Gateway} from "./L1Gateway.sol";
+   9 |
+> 10 | contract L1Forwarder is ReentrancyGuard, Ownable {
+  11 |     using Address for address;
+  12 |</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>The contract accepts ether (via `receive()`, a payable `fallback`, or a payable function) but defines no code path that can ever move ether out - no `.transfer`/`.send`, no `{value: ...}` call, no `selfdestruct`. Every wei sent to it becomes permanently unrecoverable.</p>
+
+        <div class="label">Impact</div>
+        <p>User or protocol funds sent to the contract are irreversibly frozen. There is no owner rescue, no upgrade hook, and no way to recover the balance short of redeploying and migrating.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Either remove the payable entry points if the contract is not meant to hold ether, or add an explicit withdrawal path, e.g. an access-controlled `function withdraw(address payable to) external onlyOwner { to.transfer(address(this).balance); }`.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F082: Ether can be locked in contract <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/naive-receiver/BasicForwarder.sol:13</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>11 | }
+  12 |
+> 13 | contract BasicForwarder is EIP712 {
+  14 |     struct Request {
+  15 |         address from;</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>The contract accepts ether (via `receive()`, a payable `fallback`, or a payable function) but defines no code path that can ever move ether out - no `.transfer`/`.send`, no `{value: ...}` call, no `selfdestruct`. Every wei sent to it becomes permanently unrecoverable.</p>
+
+        <div class="label">Impact</div>
+        <p>User or protocol funds sent to the contract are irreversibly frozen. There is no owner rescue, no upgrade hook, and no way to recover the balance short of redeploying and migrating.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Either remove the payable entry points if the contract is not meant to hold ether, or add an explicit withdrawal path, e.g. an access-controlled `function withdraw(address payable to) external onlyOwner { to.transfer(address(this).balance); }`.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F083: Ether can be locked in contract <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/compromised/Exchange.sol:10</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>8 | import {DamnValuableNFT} from "../DamnValuableNFT.sol";
+   9 |
+> 10 | contract Exchange is ReentrancyGuard {
+  11 |     using Address for address payable;
+  12 |</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>The contract accepts ether (via `receive()`, a payable `fallback`, or a payable function) but defines no code path that can ever move ether out - no `.transfer`/`.send`, no `{value: ...}` call, no `selfdestruct`. Every wei sent to it becomes permanently unrecoverable.</p>
+
+        <div class="label">Impact</div>
+        <p>User or protocol funds sent to the contract are irreversibly frozen. There is no owner rescue, no upgrade hook, and no way to recover the balance short of redeploying and migrating.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Either remove the payable entry points if the contract is not meant to hold ether, or add an explicit withdrawal path, e.g. an access-controlled `function withdraw(address payable to) external onlyOwner { to.transfer(address(this).balance); }`.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F084: Potential oracle manipulation <span class="badge critical">Critical</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/curvy-puppet/CurvyPuppetLending.sol:118</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>116 | function getCollateralValue(uint256 amount) public view returns (uint256) {
+  117 |     if (amount == 0) return 0;
+> 118 |     return amount.mulWadDown(oracle.getPrice(collateralAsset).value);
+  119 | }
+  120 |</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Using a spot price from a single on-chain source (e.g., a pool's reserve ratio) without manipulation resistance allows attackers to temporarily skew the price with a large trade or flash loan, then profit from the distorted price.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker can drain funds by manipulating the oracle and then trading against the protocol.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>function getPrice() public view returns (uint256) {
+    // Use a TWAP oracle instead
+    uint256 price = twapOracle.consult(address(this), tokenA, tokenB, 3600);
+    return price;
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F085: Potential oracle manipulation <span class="badge critical">Critical</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/curvy-puppet/CurvyPuppetLending.sol:134</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>132 |
+  133 |     function _getLPTokenPrice() private view returns (uint256) {
+> 134 |         return oracle.getPrice(curvePool.coins(0)).value.mulWadDown(curvePool.get_virtual_price());
+  135 |     }
+  136 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Using a spot price from a single on-chain source (e.g., a pool's reserve ratio) without manipulation resistance allows attackers to temporarily skew the price with a large trade or flash loan, then profit from the distorted price.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker can drain funds by manipulating the oracle and then trading against the protocol.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>function getPrice() public view returns (uint256) {
+    // Use a TWAP oracle instead
+    uint256 price = twapOracle.consult(address(this), tokenA, tokenB, 3600);
+    return price;
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F086: Potential oracle manipulation <span class="badge critical">Critical</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/puppet-v2/UniswapV2Library.sol:44</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>42 | {
+  43 |     (address token0,) = sortTokens(tokenA, tokenB);
+> 44 |     (uint256 reserve0, uint256 reserve1,) = IUniswapV2Pair(pairFor(factory, tokenA, tokenB)).getReserves();
+  45 |     (reserveA, reserveB) = tokenA == token0 ? (reserve0, reserve1) : (reserve1, reserve0);
+  46 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Using a spot price from a single on-chain source (e.g., a pool's reserve ratio) without manipulation resistance allows attackers to temporarily skew the price with a large trade or flash loan, then profit from the distorted price.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker can drain funds by manipulating the oracle and then trading against the protocol.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>function getPrice() public view returns (uint256) {
+    // Use a TWAP oracle instead
+    uint256 price = twapOracle.consult(address(this), tokenA, tokenB, 3600);
+    return price;
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F087: Potential oracle manipulation <span class="badge critical">Critical</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/puppet-v2/PuppetV2Pool.sol:58</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>56 | function _getOracleQuote(uint256 amount) private view returns (uint256) {
+  57 |     (uint256 reservesWETH, uint256 reservesToken) =
+> 58 |         UniswapV2Library.getReserves({factory: _uniswapFactory, tokenA: address(_weth), tokenB: address(_token)});
+  59 |
+  60 |     return UniswapV2Library.quote({amountA: amount * 10 ** 18, reserveA: reservesToken, reserveB: reservesWETH});</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Using a spot price from a single on-chain source (e.g., a pool's reserve ratio) without manipulation resistance allows attackers to temporarily skew the price with a large trade or flash loan, then profit from the distorted price.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker can drain funds by manipulating the oracle and then trading against the protocol.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>function getPrice() public view returns (uint256) {
+    // Use a TWAP oracle instead
+    uint256 price = twapOracle.consult(address(this), tokenA, tokenB, 3600);
+    return price;
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F088: Missing nonce in permit (signature replay) <span class="badge critical">Critical</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/puppet-v3/INonfungiblePositionManager.sol:83</span>
+        &nbsp;|&nbsp; <strong>Function:</strong> <span class="loc">permit</span></p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>81 | function name() external view returns (string memory);
+  82 | function ownerOf(uint256 tokenId) external view returns (address);
+> 83 | function permit(address spender, uint256 tokenId, uint256 deadline, uint8 v, bytes32 r, bytes32 s)
+  84 |     external
+  85 |     payable;</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>EIP-2612 `permit` functions must include a nonce to prevent signature replay across chains or after the permit is used. Without proper nonce tracking, the same signature can be reused multiple times.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker can replay a permit signature to spend tokens multiple times, draining user funds.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) public {
+    require(deadline >= block.timestamp, "Permit: expired");
+    bytes32 structHash = keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline));
+    // ...
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F089: Timestamp dependency <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/curvy-puppet/CurvyPuppetOracle.sol:28</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>26 |
+  27 | if (price.value == 0) revert UnsupportedAsset();
+> 28 | if (block.timestamp > price.expiration) revert StalePrice();
+  29 |
+  30 | return price;</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Miners have some influence over `block.timestamp`. Using it for critical logic (e.g., time-based transitions, deadlines) can be manipulated within a range of about 15 seconds.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could manipulate timestamps to gain unfair advantages, such as delaying or accelerating time-sensitive operations.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Do not use block.timestamp for randomness. Use a verifiable source.
+import "@chainlink/contracts/src/v0.8/vrf/VRFConsumerBaseV2.sol";
+// Request randomness from Chainlink VRF and act in the callback.
+
+// If you only need coarse time gating, that is fine, but widen the
+// tolerance so a few seconds of drift cannot be exploited:
+uint256 public constant DURATION = 1 days;
+uint256 public endTime;
+
+function start() external {
+    endTime = block.timestamp + DURATION;
+}
+
+function claim() external {
+    require(block.timestamp >= endTime, "Not ended");
+    // ...
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F090: Timestamp dependency <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/shards/ShardsNFTMarketplace.sol:153</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>151 | if (purchase.cancelled) revert AlreadyCancelled();
+  152 | if (
+> 153 |     purchase.timestamp + CANCEL_PERIOD_LENGTH < block.timestamp
+  154 |         || block.timestamp > purchase.timestamp + TIME_BEFORE_CANCEL
+  155 | ) revert BadTime();</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Miners have some influence over `block.timestamp`. Using it for critical logic (e.g., time-based transitions, deadlines) can be manipulated within a range of about 15 seconds.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could manipulate timestamps to gain unfair advantages, such as delaying or accelerating time-sensitive operations.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Do not use block.timestamp for randomness. Use a verifiable source.
+import "@chainlink/contracts/src/v0.8/vrf/VRFConsumerBaseV2.sol";
+// Request randomness from Chainlink VRF and act in the callback.
+
+// If you only need coarse time gating, that is fine, but widen the
+// tolerance so a few seconds of drift cannot be exploited:
+uint256 public constant DURATION = 1 days;
+uint256 public endTime;
+
+function start() external {
+    endTime = block.timestamp + DURATION;
+}
+
+function claim() external {
+    require(block.timestamp >= endTime, "Not ended");
+    // ...
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F091: Timestamp dependency <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/climber/ClimberVault.sol:52</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>50 | }
+  51 |
+> 52 | if (block.timestamp <= _lastWithdrawalTimestamp + WAITING_PERIOD) {
+  53 |     revert InvalidWithdrawalTime();
+  54 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Miners have some influence over `block.timestamp`. Using it for critical logic (e.g., time-based transitions, deadlines) can be manipulated within a range of about 15 seconds.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could manipulate timestamps to gain unfair advantages, such as delaying or accelerating time-sensitive operations.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Do not use block.timestamp for randomness. Use a verifiable source.
+import "@chainlink/contracts/src/v0.8/vrf/VRFConsumerBaseV2.sol";
+// Request randomness from Chainlink VRF and act in the callback.
+
+// If you only need coarse time gating, that is fine, but widen the
+// tolerance so a few seconds of drift cannot be exploited:
+uint256 public constant DURATION = 1 days;
+uint256 public endTime;
+
+function start() external {
+    endTime = block.timestamp + DURATION;
+}
+
+function claim() external {
+    require(block.timestamp >= endTime, "Not ended");
+    // ...
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F092: Timestamp dependency <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/climber/ClimberTimelockBase.sol:34</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>32 | if (op.executed) {
+  33 |     state = OperationState.Executed;
+> 34 | } else if (block.timestamp < op.readyAtTimestamp) {
+  35 |     state = OperationState.Scheduled;
+  36 | } else {</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Miners have some influence over `block.timestamp`. Using it for critical logic (e.g., time-based transitions, deadlines) can be manipulated within a range of about 15 seconds.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could manipulate timestamps to gain unfair advantages, such as delaying or accelerating time-sensitive operations.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Do not use block.timestamp for randomness. Use a verifiable source.
+import "@chainlink/contracts/src/v0.8/vrf/VRFConsumerBaseV2.sol";
+// Request randomness from Chainlink VRF and act in the callback.
+
+// If you only need coarse time gating, that is fine, but widen the
+// tolerance so a few seconds of drift cannot be exploited:
+uint256 public constant DURATION = 1 days;
+uint256 public endTime;
+
+function start() external {
+    endTime = block.timestamp + DURATION;
+}
+
+function claim() external {
+    require(block.timestamp >= endTime, "Not ended");
+    // ...
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F093: Timestamp dependency <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/withdrawal/L1Gateway.sol:42</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>40 |     bytes32[] memory proof
+  41 | ) external {
+> 42 |     if (timestamp + DELAY > block.timestamp) revert EarlyWithdrawal();
+  43 |
+  44 |     bytes32 leaf = keccak256(abi.encode(nonce, l2Sender, target, timestamp, message));</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Miners have some influence over `block.timestamp`. Using it for critical logic (e.g., time-based transitions, deadlines) can be manipulated within a range of about 15 seconds.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could manipulate timestamps to gain unfair advantages, such as delaying or accelerating time-sensitive operations.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Do not use block.timestamp for randomness. Use a verifiable source.
+import "@chainlink/contracts/src/v0.8/vrf/VRFConsumerBaseV2.sol";
+// Request randomness from Chainlink VRF and act in the callback.
+
+// If you only need coarse time gating, that is fine, but widen the
+// tolerance so a few seconds of drift cannot be exploited:
+uint256 public constant DURATION = 1 days;
+uint256 public endTime;
+
+function start() external {
+    endTime = block.timestamp + DURATION;
+}
+
+function claim() external {
+    require(block.timestamp >= endTime, "Not ended");
+    // ...
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F094: Timestamp dependency <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/abi-smuggling/SelfAuthorizedVault.sol:38</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>36 | }
+  37 |
+> 38 | if (block.timestamp <= _lastWithdrawalTimestamp + WAITING_PERIOD) {
+  39 |     revert WithdrawalWaitingPeriodNotEnded();
+  40 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Miners have some influence over `block.timestamp`. Using it for critical logic (e.g., time-based transitions, deadlines) can be manipulated within a range of about 15 seconds.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could manipulate timestamps to gain unfair advantages, such as delaying or accelerating time-sensitive operations.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Do not use block.timestamp for randomness. Use a verifiable source.
+import "@chainlink/contracts/src/v0.8/vrf/VRFConsumerBaseV2.sol";
+// Request randomness from Chainlink VRF and act in the callback.
+
+// If you only need coarse time gating, that is fine, but widen the
+// tolerance so a few seconds of drift cannot be exploited:
+uint256 public constant DURATION = 1 days;
+uint256 public endTime;
+
+function start() external {
+    endTime = block.timestamp + DURATION;
+}
+
+function claim() external {
+    require(block.timestamp >= endTime, "Not ended");
+    // ...
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F095: Timestamp dependency <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/unstoppable/UnstoppableVault.sol:61</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>59 | }
+  60 |
+> 61 | if (block.timestamp < end && _amount < maxFlashLoan(_token)) {
+  62 |     return 0;
+  63 | } else {</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Miners have some influence over `block.timestamp`. Using it for critical logic (e.g., time-based transitions, deadlines) can be manipulated within a range of about 15 seconds.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could manipulate timestamps to gain unfair advantages, such as delaying or accelerating time-sensitive operations.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Do not use block.timestamp for randomness. Use a verifiable source.
+import "@chainlink/contracts/src/v0.8/vrf/VRFConsumerBaseV2.sol";
+// Request randomness from Chainlink VRF and act in the callback.
+
+// If you only need coarse time gating, that is fine, but widen the
+// tolerance so a few seconds of drift cannot be exploited:
+uint256 public constant DURATION = 1 days;
+uint256 public endTime;
+
+function start() external {
+    endTime = block.timestamp + DURATION;
+}
+
+function claim() external {
+    require(block.timestamp >= endTime, "Not ended");
+    // ...
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F096: Timestamp dependency <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/naive-receiver/BasicForwarder.sol:46</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>44 | function _checkRequest(Request calldata request, bytes calldata signature) private view {
+  45 |     if (request.value != msg.value) revert InvalidValue();
+> 46 |     if (block.timestamp > request.deadline) revert OldRequest();
+  47 |     if (nonces[request.from] != request.nonce) revert InvalidNonce();
+  48 |</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Miners have some influence over `block.timestamp`. Using it for critical logic (e.g., time-based transitions, deadlines) can be manipulated within a range of about 15 seconds.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could manipulate timestamps to gain unfair advantages, such as delaying or accelerating time-sensitive operations.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Do not use block.timestamp for randomness. Use a verifiable source.
+import "@chainlink/contracts/src/v0.8/vrf/VRFConsumerBaseV2.sol";
+// Request randomness from Chainlink VRF and act in the callback.
+
+// If you only need coarse time gating, that is fine, but widen the
+// tolerance so a few seconds of drift cannot be exploited:
+uint256 public constant DURATION = 1 days;
+uint256 public endTime;
+
+function start() external {
+    endTime = block.timestamp + DURATION;
+}
+
+function claim() external {
+    require(block.timestamp >= endTime, "Not ended");
+    // ...
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F097: tx.origin used for authentication <span class="badge critical">Critical</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/free-rider/FreeRiderRecoveryManager.sol:45</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>43 | }
+  44 |
+> 45 | if (tx.origin != beneficiary) {
+  46 |     revert OriginNotBeneficiary();
+  47 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Using `tx.origin` for authentication is dangerous because it represents the original sender of the transaction. If a contract uses `tx.origin` to authorize critical actions, an attacker can trick a user into interacting with a malicious contract that then calls the vulnerable contract, appearing as if the user is calling directly.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker can perform privileged actions on behalf of the user, such as stealing funds or changing ownership.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>function withdraw() public {
+    require(msg.sender == owner, "Not owner"); // use msg.sender
+    // ...
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F098: Use of tx.origin for authentication <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/free-rider/FreeRiderRecoveryManager.sol:45</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>43 | }
+  44 |
+> 45 | if (tx.origin != beneficiary) {
+  46 |     revert OriginNotBeneficiary();
+  47 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Using `tx.origin` for authentication is dangerous because it represents the original sender of the transaction, which can be different from `msg.sender` in a chain of calls. An attacker can trick a contract into using the caller's `tx.origin` to bypass checks.</p>
+
+        <div class="label">Impact</div>
+        <p>Phishing attacks can trick users into interacting with malicious contracts that then call the vulnerable contract, appearing as if the user is calling directly.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Use `msg.sender` instead of `tx.origin` for authentication. If you need to know the original sender, consider other patterns or clearly document the risks.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F099: Unbounded loop may cause gas exhaustion <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/free-rider/FreeRiderNFTMarketplace.sol:84</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>82 |
+  83 | function buyMany(uint256[] calldata tokenIds) external payable nonReentrant {
+> 84 |     for (uint256 i = 0; i < tokenIds.length; ++i) {
+  85 |         unchecked {
+  86 |             _buyOne(tokenIds[i]);</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Loops that iterate over dynamic arrays of unbounded length can exceed the block gas limit, causing the function to always revert and effectively locking funds.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could fill the array to make the function uncallable, leading to denial of service.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Use pagination
+function processItems(uint start, uint count) external {
+    for (uint i = start; i < start + count && i < array.length; i++) {
+        // process
+    }
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F100: Unbounded loop may cause gas exhaustion <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/shards/ShardsNFTMarketplace.sol:205</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>203 | uint256 payment;
+  204 |
+> 205 | for (uint256 i = 0; i < _purchases.length; i++) {
+  206 |     Purchase memory purchase = _purchases[i];
+  207 |     if (purchase.cancelled) continue;</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Loops that iterate over dynamic arrays of unbounded length can exceed the block gas limit, causing the function to always revert and effectively locking funds.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could fill the array to make the function uncallable, leading to denial of service.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Use pagination
+function processItems(uint start, uint count) external {
+    for (uint i = start; i < start + count && i < array.length; i++) {
+        // process
+    }
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F101: Unbounded loop may cause gas exhaustion <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/wallet-mining/AuthorizerUpgradeable.sol:17</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>15 | function init(address[] memory _wards, address[] memory _aims) external {
+  16 |     require(needsInit != 0, "cannot init");
+> 17 |     for (uint256 i = 0; i < _wards.length; i++) {
+  18 |         _rely(_wards[i], _aims[i]);
+  19 |     }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Loops that iterate over dynamic arrays of unbounded length can exceed the block gas limit, causing the function to always revert and effectively locking funds.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could fill the array to make the function uncallable, leading to denial of service.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Use pagination
+function processItems(uint start, uint count) external {
+    for (uint i = start; i < start + count && i < array.length; i++) {
+        // process
+    }
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F102: Unbounded loop may cause gas exhaustion <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/climber/ClimberTimelock.sol:90</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>88 | bytes32 id = getOperationId(targets, values, dataElements, salt);
+  89 |
+> 90 | for (uint8 i = 0; i < targets.length; ++i) {
+  91 |     targets[i].functionCallWithValue(dataElements[i], values[i]);
+  92 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Loops that iterate over dynamic arrays of unbounded length can exceed the block gas limit, causing the function to always revert and effectively locking funds.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could fill the array to make the function uncallable, leading to denial of service.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Use pagination
+function processItems(uint start, uint count) external {
+    for (uint i = start; i < start + count && i < array.length; i++) {
+        // process
+    }
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F103: Unbounded loop may cause gas exhaustion <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/abi-smuggling/AuthorizedExecutor.sol:30</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>28 | }
+  29 |
+> 30 | for (uint256 i = 0; i < ids.length;) {
+  31 |     unchecked {
+  32 |         permissions[ids[i]] = true;</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Loops that iterate over dynamic arrays of unbounded length can exceed the block gas limit, causing the function to always revert and effectively locking funds.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could fill the array to make the function uncallable, leading to denial of service.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Use pagination
+function processItems(uint start, uint count) external {
+    for (uint i = start; i < start + count && i < array.length; i++) {
+        // process
+    }
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F104: Unbounded loop may cause gas exhaustion <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/the-rewarder/TheRewarderDistributor.sol:72</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>70 |
+  71 | function clean(IERC20[] calldata tokens) external {
+> 72 |     for (uint256 i = 0; i < tokens.length; i++) {
+  73 |         IERC20 token = tokens[i];
+  74 |         if (distributions[token].remaining == 0) {</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Loops that iterate over dynamic arrays of unbounded length can exceed the block gas limit, causing the function to always revert and effectively locking funds.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could fill the array to make the function uncallable, leading to denial of service.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Use pagination
+function processItems(uint start, uint count) external {
+    for (uint i = start; i < start + count && i < array.length; i++) {
+        // process
+    }
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F105: Unbounded loop may cause gas exhaustion <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/the-rewarder/TheRewarderDistributor.sol:87</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>85 | uint256 amount;
+  86 |
+> 87 | for (uint256 i = 0; i < inputClaims.length; i++) {
+  88 |     inputClaim = inputClaims[i];
+  89 |</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Loops that iterate over dynamic arrays of unbounded length can exceed the block gas limit, causing the function to always revert and effectively locking funds.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could fill the array to make the function uncallable, leading to denial of service.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Use pagination
+function processItems(uint start, uint count) external {
+    for (uint i = start; i < start + count && i < array.length; i++) {
+        // process
+    }
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F106: Unbounded loop may cause gas exhaustion <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/puppet-v2/UniswapV2Library.sol:91</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>89 | amounts = new uint256[](path.length);
+  90 | amounts[0] = amountIn;
+> 91 | for (uint256 i; i < path.length - 1; i++) {
+  92 |     (uint256 reserveIn, uint256 reserveOut) = getReserves(factory, path[i], path[i + 1]);
+  93 |     amounts[i + 1] = getAmountOut(amounts[i], reserveIn, reserveOut);</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Loops that iterate over dynamic arrays of unbounded length can exceed the block gas limit, causing the function to always revert and effectively locking funds.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could fill the array to make the function uncallable, leading to denial of service.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Use pagination
+function processItems(uint start, uint count) external {
+    for (uint i = start; i < start + count && i < array.length; i++) {
+        // process
+    }
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F107: Unbounded loop may cause gas exhaustion <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/puppet-v2/UniswapV2Library.sol:106</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>104 | amounts = new uint256[](path.length);
+  105 | amounts[amounts.length - 1] = amountOut;
+> 106 | for (uint256 i = path.length - 1; i > 0; i--) {
+  107 |     (uint256 reserveIn, uint256 reserveOut) = getReserves(factory, path[i - 1], path[i]);
+  108 |     amounts[i - 1] = getAmountIn(amounts[i], reserveIn, reserveOut);</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Loops that iterate over dynamic arrays of unbounded length can exceed the block gas limit, causing the function to always revert and effectively locking funds.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could fill the array to make the function uncallable, leading to denial of service.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Use pagination
+function processItems(uint start, uint count) external {
+    for (uint i = start; i < start + count && i < array.length; i++) {
+        // process
+    }
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F108: Unbounded loop may cause gas exhaustion <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/backdoor/WalletRegistry.sol:52</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>50 | token = IERC20(tokenAddress);
+  51 |
+> 52 | for (uint256 i = 0; i < initialBeneficiaries.length; ++i) {
+  53 |     unchecked {
+  54 |         beneficiaries[initialBeneficiaries[i]] = true;</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Loops that iterate over dynamic arrays of unbounded length can exceed the block gas limit, causing the function to always revert and effectively locking funds.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could fill the array to make the function uncallable, leading to denial of service.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Use pagination
+function processItems(uint start, uint count) external {
+    for (uint i = start; i < start + count && i < array.length; i++) {
+        // process
+    }
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F109: Unbounded loop may cause gas exhaustion <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/naive-receiver/Multicall.sol:11</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>9 | function multicall(bytes[] calldata data) external virtual returns (bytes[] memory results) {
+  10 |     results = new bytes[](data.length);
+> 11 |     for (uint256 i = 0; i < data.length; i++) {
+  12 |         results[i] = Address.functionDelegateCall(address(this), data[i]);
+  13 |     }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Loops that iterate over dynamic arrays of unbounded length can exceed the block gas limit, causing the function to always revert and effectively locking funds.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could fill the array to make the function uncallable, leading to denial of service.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Use pagination
+function processItems(uint start, uint count) external {
+    for (uint i = start; i < start + count && i < array.length; i++) {
+        // process
+    }
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F110: Unbounded loop may cause gas exhaustion <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/compromised/TrustfulOracle.sol:28</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>26 |     revert NotEnoughSources();
+  27 | }
+> 28 | for (uint256 i = 0; i < sources.length;) {
+  29 |     unchecked {
+  30 |         _grantRole(TRUSTED_SOURCE_ROLE, sources[i]);</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Loops that iterate over dynamic arrays of unbounded length can exceed the block gas limit, causing the function to always revert and effectively locking funds.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could fill the array to make the function uncallable, leading to denial of service.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Use pagination
+function processItems(uint start, uint count) external {
+    for (uint i = start; i < start + count && i < array.length; i++) {
+        // process
+    }
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F111: Unbounded loop may cause gas exhaustion <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/compromised/TrustfulOracle.sol:46</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>44 | // Only allow one (symbol, price) per source
+  45 | require(sources.length == symbols.length && symbols.length == prices.length);
+> 46 | for (uint256 i = 0; i < sources.length;) {
+  47 |     unchecked {
+  48 |         _setPrice(sources[i], symbols[i], prices[i]);</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Loops that iterate over dynamic arrays of unbounded length can exceed the block gas limit, causing the function to always revert and effectively locking funds.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could fill the array to make the function uncallable, leading to denial of service.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Use pagination
+function processItems(uint start, uint count) external {
+    for (uint i = start; i < start + count && i < array.length; i++) {
+        // process
+    }
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F112: Unchecked send/transfer <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/DamnValuableStaking.sol:54</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>52 |     _updateReward(msg.sender);
+  53 |     _updateReward(recipient);
+> 54 |     return super.transfer(recipient, amount);
+  55 | }
+  56 |</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>`send()` and `transfer()` return a boolean indicating success. If you don't check this return value, the function may silently fail, leading to incorrect contract state.</p>
+
+        <div class="label">Impact</div>
+        <p>Failed transfers could leave the contract in an inconsistent state, possibly locking funds or allowing users to withdraw more than they should.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Always check the return value of low level calls and revert on failure.
+function withdraw(uint256 amount) external {
+    require(balances[msg.sender] >= amount, "Insufficient");
+    balances[msg.sender] -= amount; // effects before interaction
+    (bool ok, ) = msg.sender.call{value: amount}("");
+    require(ok, "Transfer failed");
+}
+
+// Or use OpenZeppelin Address.sendValue, which reverts on failure:
+// Address.sendValue(payable(msg.sender), amount);</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F113: Unchecked send/transfer <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/DamnValuableStaking.sol:69</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>67 |     _burn(msg.sender, amount);
+  68 |
+> 69 |     token.transfer(msg.sender, amount);
+  70 |     return amount;
+  71 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>`send()` and `transfer()` return a boolean indicating success. If you don't check this return value, the function may silently fail, leading to incorrect contract state.</p>
+
+        <div class="label">Impact</div>
+        <p>Failed transfers could leave the contract in an inconsistent state, possibly locking funds or allowing users to withdraw more than they should.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Always check the return value of low level calls and revert on failure.
+function withdraw(uint256 amount) external {
+    require(balances[msg.sender] >= amount, "Insufficient");
+    balances[msg.sender] -= amount; // effects before interaction
+    (bool ok, ) = msg.sender.call{value: amount}("");
+    require(ok, "Transfer failed");
+}
+
+// Or use OpenZeppelin Address.sendValue, which reverts on failure:
+// Address.sendValue(payable(msg.sender), amount);</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F114: Unchecked send/transfer <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/DamnValuableStaking.sol:78</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>76 | if (reward > 0) {
+  77 |     delete rewards[msg.sender];
+> 78 |     token.transfer(msg.sender, reward);
+  79 | }
+  80 | return reward;</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>`send()` and `transfer()` return a boolean indicating success. If you don't check this return value, the function may silently fail, leading to incorrect contract state.</p>
+
+        <div class="label">Impact</div>
+        <p>Failed transfers could leave the contract in an inconsistent state, possibly locking funds or allowing users to withdraw more than they should.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Always check the return value of low level calls and revert on failure.
+function withdraw(uint256 amount) external {
+    require(balances[msg.sender] >= amount, "Insufficient");
+    balances[msg.sender] -= amount; // effects before interaction
+    (bool ok, ) = msg.sender.call{value: amount}("");
+    require(ok, "Transfer failed");
+}
+
+// Or use OpenZeppelin Address.sendValue, which reverts on failure:
+// Address.sendValue(payable(msg.sender), amount);</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F115: Unchecked send/transfer <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/curvy-puppet/CurvyPuppetLending.sol:58</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>56 |
+  57 |     positions[msg.sender].collateralAmount = remainingCollateral;
+> 58 |     IERC20(collateralAsset).transfer(msg.sender, amount);
+  59 | }
+  60 |</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>`send()` and `transfer()` return a boolean indicating success. If you don't check this return value, the function may silently fail, leading to incorrect contract state.</p>
+
+        <div class="label">Impact</div>
+        <p>Failed transfers could leave the contract in an inconsistent state, possibly locking funds or allowing users to withdraw more than they should.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Always check the return value of low level calls and revert on failure.
+function withdraw(uint256 amount) external {
+    require(balances[msg.sender] >= amount, "Insufficient");
+    balances[msg.sender] -= amount; // effects before interaction
+    (bool ok, ) = msg.sender.call{value: amount}("");
+    require(ok, "Transfer failed");
+}
+
+// Or use OpenZeppelin Address.sendValue, which reverts on failure:
+// Address.sendValue(payable(msg.sender), amount);</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F116: Unchecked send/transfer <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/curvy-puppet/CurvyPuppetLending.sol:82</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>80 |     // Update caller's position and transfer borrowed assets
+  81 |     positions[msg.sender].borrowAmount += amount;
+> 82 |     IERC20(borrowAsset).transfer(msg.sender, amount);
+  83 | }
+  84 |</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>`send()` and `transfer()` return a boolean indicating success. If you don't check this return value, the function may silently fail, leading to incorrect contract state.</p>
+
+        <div class="label">Impact</div>
+        <p>Failed transfers could leave the contract in an inconsistent state, possibly locking funds or allowing users to withdraw more than they should.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Always check the return value of low level calls and revert on failure.
+function withdraw(uint256 amount) external {
+    require(balances[msg.sender] >= amount, "Insufficient");
+    balances[msg.sender] -= amount; // effects before interaction
+    (bool ok, ) = msg.sender.call{value: amount}("");
+    require(ok, "Transfer failed");
+}
+
+// Or use OpenZeppelin Address.sendValue, which reverts on failure:
+// Address.sendValue(payable(msg.sender), amount);</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F117: Unchecked send/transfer <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/curvy-puppet/CurvyPuppetLending.sol:93</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>91 |         uint256 returnAmount = positions[msg.sender].collateralAmount;
+  92 |         positions[msg.sender].collateralAmount = 0;
+> 93 |         IERC20(collateralAsset).transfer(msg.sender, returnAmount);
+  94 |     }
+  95 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>`send()` and `transfer()` return a boolean indicating success. If you don't check this return value, the function may silently fail, leading to incorrect contract state.</p>
+
+        <div class="label">Impact</div>
+        <p>Failed transfers could leave the contract in an inconsistent state, possibly locking funds or allowing users to withdraw more than they should.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Always check the return value of low level calls and revert on failure.
+function withdraw(uint256 amount) external {
+    require(balances[msg.sender] >= amount, "Insufficient");
+    balances[msg.sender] -= amount; // effects before interaction
+    (bool ok, ) = msg.sender.call{value: amount}("");
+    require(ok, "Transfer failed");
+}
+
+// Or use OpenZeppelin Address.sendValue, which reverts on failure:
+// Address.sendValue(payable(msg.sender), amount);</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F118: Unchecked send/transfer <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/curvy-puppet/CurvyPuppetLending.sol:108</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>106 |
+  107 |     _pullAssets(borrowAsset, borrowAmount);
+> 108 |     IERC20(collateralAsset).transfer(msg.sender, collateralAmount);
+  109 | }
+  110 |</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>`send()` and `transfer()` return a boolean indicating success. If you don't check this return value, the function may silently fail, leading to incorrect contract state.</p>
+
+        <div class="label">Impact</div>
+        <p>Failed transfers could leave the contract in an inconsistent state, possibly locking funds or allowing users to withdraw more than they should.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Always check the return value of low level calls and revert on failure.
+function withdraw(uint256 amount) external {
+    require(balances[msg.sender] >= amount, "Insufficient");
+    balances[msg.sender] -= amount; // effects before interaction
+    (bool ok, ) = msg.sender.call{value: amount}("");
+    require(ok, "Transfer failed");
+}
+
+// Or use OpenZeppelin Address.sendValue, which reverts on failure:
+// Address.sendValue(payable(msg.sender), amount);</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F119: Unchecked send/transfer <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/shards/ShardsNFTMarketplace.sol:163</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>161 |     emit Cancelled(offerId, purchaseIndex);
+  162 |
+> 163 |     paymentToken.transfer(buyer, purchase.shards.mulDivUp(purchase.rate, 1e6));
+  164 | }
+  165 |</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>`send()` and `transfer()` return a boolean indicating success. If you don't check this return value, the function may silently fail, leading to incorrect contract state.</p>
+
+        <div class="label">Impact</div>
+        <p>Failed transfers could leave the contract in an inconsistent state, possibly locking funds or allowing users to withdraw more than they should.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Always check the return value of low level calls and revert on failure.
+function withdraw(uint256 amount) external {
+    require(balances[msg.sender] >= amount, "Insufficient");
+    balances[msg.sender] -= amount; // effects before interaction
+    (bool ok, ) = msg.sender.call{value: amount}("");
+    require(ok, "Transfer failed");
+}
+
+// Or use OpenZeppelin Address.sendValue, which reverts on failure:
+// Address.sendValue(payable(msg.sender), amount);</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F120: Unchecked send/transfer <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/shards/ShardsNFTMarketplace.sol:215</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>213 |     offers[offerId].isOpen = false;
+  214 |     emit ClosedOffer(offerId);
+> 215 |     paymentToken.transfer(offer.seller, payment);
+  216 | }
+  217 |</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>`send()` and `transfer()` return a boolean indicating success. If you don't check this return value, the function may silently fail, leading to incorrect contract state.</p>
+
+        <div class="label">Impact</div>
+        <p>Failed transfers could leave the contract in an inconsistent state, possibly locking funds or allowing users to withdraw more than they should.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Always check the return value of low level calls and revert on failure.
+function withdraw(uint256 amount) external {
+    require(balances[msg.sender] >= amount, "Insufficient");
+    balances[msg.sender] -= amount; // effects before interaction
+    (bool ok, ) = msg.sender.call{value: amount}("");
+    require(ok, "Transfer failed");
+}
+
+// Or use OpenZeppelin Address.sendValue, which reverts on failure:
+// Address.sendValue(payable(msg.sender), amount);</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F121: Unchecked send/transfer <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/shards/ShardsFeeVault.sol:43</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>41 |         staking.withdraw(stakedAmount);
+  42 |     }
+> 43 |     token.transfer(receiver, unstakedAmount + rewards + stakedAmount);
+  44 | }
+  45 |</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>`send()` and `transfer()` return a boolean indicating success. If you don't check this return value, the function may silently fail, leading to incorrect contract state.</p>
+
+        <div class="label">Impact</div>
+        <p>Failed transfers could leave the contract in an inconsistent state, possibly locking funds or allowing users to withdraw more than they should.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Always check the return value of low level calls and revert on failure.
+function withdraw(uint256 amount) external {
+    require(balances[msg.sender] >= amount, "Insufficient");
+    balances[msg.sender] -= amount; // effects before interaction
+    (bool ok, ) = msg.sender.call{value: amount}("");
+    require(ok, "Transfer failed");
+}
+
+// Or use OpenZeppelin Address.sendValue, which reverts on failure:
+// Address.sendValue(payable(msg.sender), amount);</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F122: Unchecked send/transfer <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/wallet-mining/WalletDeployer.sol:58</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>56 |
+  57 | if (IERC20(gem).balanceOf(address(this)) >= pay) {
+> 58 |     IERC20(gem).transfer(msg.sender, pay);
+  59 | }
+  60 | return true;</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>`send()` and `transfer()` return a boolean indicating success. If you don't check this return value, the function may silently fail, leading to incorrect contract state.</p>
+
+        <div class="label">Impact</div>
+        <p>Failed transfers could leave the contract in an inconsistent state, possibly locking funds or allowing users to withdraw more than they should.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Always check the return value of low level calls and revert on failure.
+function withdraw(uint256 amount) external {
+    require(balances[msg.sender] >= amount, "Insufficient");
+    balances[msg.sender] -= amount; // effects before interaction
+    (bool ok, ) = msg.sender.call{value: amount}("");
+    require(ok, "Transfer failed");
+}
+
+// Or use OpenZeppelin Address.sendValue, which reverts on failure:
+// Address.sendValue(payable(msg.sender), amount);</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F123: Unchecked send/transfer <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/withdrawal/TokenBridge.sol:26</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>24 |     if (msg.sender != address(l1Forwarder) || l1Forwarder.getSender() == otherBridge) revert Unauthorized();
+  25 |     totalDeposits -= amount;
+> 26 |     token.transfer(receiver, amount);
+  27 | }
+  28 |</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>`send()` and `transfer()` return a boolean indicating success. If you don't check this return value, the function may silently fail, leading to incorrect contract state.</p>
+
+        <div class="label">Impact</div>
+        <p>Failed transfers could leave the contract in an inconsistent state, possibly locking funds or allowing users to withdraw more than they should.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Always check the return value of low level calls and revert on failure.
+function withdraw(uint256 amount) external {
+    require(balances[msg.sender] >= amount, "Insufficient");
+    balances[msg.sender] -= amount; // effects before interaction
+    (bool ok, ) = msg.sender.call{value: amount}("");
+    require(ok, "Transfer failed");
+}
+
+// Or use OpenZeppelin Address.sendValue, which reverts on failure:
+// Address.sendValue(payable(msg.sender), amount);</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F124: Unchecked send/transfer <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/selfie/SelfiePool.sol:59</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>57 | }
+  58 |
+> 59 | token.transfer(address(_receiver), _amount);
+  60 | if (_receiver.onFlashLoan(msg.sender, _token, _amount, 0, _data) != CALLBACK_SUCCESS) {
+  61 |     revert CallbackFailed();</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>`send()` and `transfer()` return a boolean indicating success. If you don't check this return value, the function may silently fail, leading to incorrect contract state.</p>
+
+        <div class="label">Impact</div>
+        <p>Failed transfers could leave the contract in an inconsistent state, possibly locking funds or allowing users to withdraw more than they should.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Always check the return value of low level calls and revert on failure.
+function withdraw(uint256 amount) external {
+    require(balances[msg.sender] >= amount, "Insufficient");
+    balances[msg.sender] -= amount; // effects before interaction
+    (bool ok, ) = msg.sender.call{value: amount}("");
+    require(ok, "Transfer failed");
+}
+
+// Or use OpenZeppelin Address.sendValue, which reverts on failure:
+// Address.sendValue(payable(msg.sender), amount);</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F125: Unchecked send/transfer <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/selfie/SelfiePool.sol:73</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>71 | function emergencyExit(address receiver) external onlyGovernance {
+  72 |     uint256 amount = token.balanceOf(address(this));
+> 73 |     token.transfer(receiver, amount);
+  74 |
+  75 |     emit EmergencyExit(receiver, amount);</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>`send()` and `transfer()` return a boolean indicating success. If you don't check this return value, the function may silently fail, leading to incorrect contract state.</p>
+
+        <div class="label">Impact</div>
+        <p>Failed transfers could leave the contract in an inconsistent state, possibly locking funds or allowing users to withdraw more than they should.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Always check the return value of low level calls and revert on failure.
+function withdraw(uint256 amount) external {
+    require(balances[msg.sender] >= amount, "Insufficient");
+    balances[msg.sender] -= amount; // effects before interaction
+    (bool ok, ) = msg.sender.call{value: amount}("");
+    require(ok, "Transfer failed");
+}
+
+// Or use OpenZeppelin Address.sendValue, which reverts on failure:
+// Address.sendValue(payable(msg.sender), amount);</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F126: Unchecked send/transfer <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/the-rewarder/TheRewarderDistributor.sol:75</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>73 |     IERC20 token = tokens[i];
+  74 |     if (distributions[token].remaining == 0) {
+> 75 |         token.transfer(owner, token.balanceOf(address(this)));
+  76 |     }
+  77 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>`send()` and `transfer()` return a boolean indicating success. If you don't check this return value, the function may silently fail, leading to incorrect contract state.</p>
+
+        <div class="label">Impact</div>
+        <p>Failed transfers could leave the contract in an inconsistent state, possibly locking funds or allowing users to withdraw more than they should.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Always check the return value of low level calls and revert on failure.
+function withdraw(uint256 amount) external {
+    require(balances[msg.sender] >= amount, "Insufficient");
+    balances[msg.sender] -= amount; // effects before interaction
+    (bool ok, ) = msg.sender.call{value: amount}("");
+    require(ok, "Transfer failed");
+}
+
+// Or use OpenZeppelin Address.sendValue, which reverts on failure:
+// Address.sendValue(payable(msg.sender), amount);</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F127: Unchecked send/transfer <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/the-rewarder/TheRewarderDistributor.sol:116</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>114 |         if (!MerkleProof.verify(inputClaim.proof, root, leaf)) revert InvalidProof();
+  115 |
+> 116 |         inputTokens[inputClaim.tokenIndex].transfer(msg.sender, inputClaim.amount);
+  117 |     }
+  118 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>`send()` and `transfer()` return a boolean indicating success. If you don't check this return value, the function may silently fail, leading to incorrect contract state.</p>
+
+        <div class="label">Impact</div>
+        <p>Failed transfers could leave the contract in an inconsistent state, possibly locking funds or allowing users to withdraw more than they should.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Always check the return value of low level calls and revert on failure.
+function withdraw(uint256 amount) external {
+    require(balances[msg.sender] >= amount, "Insufficient");
+    balances[msg.sender] -= amount; // effects before interaction
+    (bool ok, ) = msg.sender.call{value: amount}("");
+    require(ok, "Transfer failed");
+}
+
+// Or use OpenZeppelin Address.sendValue, which reverts on failure:
+// Address.sendValue(payable(msg.sender), amount);</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F128: Unchecked send/transfer <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/truster/TrusterLenderPool.sol:27</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>25 | uint256 balanceBefore = token.balanceOf(address(this));
+  26 |
+> 27 | token.transfer(borrower, amount);
+  28 | target.functionCall(data);
+  29 |</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>`send()` and `transfer()` return a boolean indicating success. If you don't check this return value, the function may silently fail, leading to incorrect contract state.</p>
+
+        <div class="label">Impact</div>
+        <p>Failed transfers could leave the contract in an inconsistent state, possibly locking funds or allowing users to withdraw more than they should.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Always check the return value of low level calls and revert on failure.
+function withdraw(uint256 amount) external {
+    require(balances[msg.sender] >= amount, "Insufficient");
+    balances[msg.sender] -= amount; // effects before interaction
+    (bool ok, ) = msg.sender.call{value: amount}("");
+    require(ok, "Transfer failed");
+}
+
+// Or use OpenZeppelin Address.sendValue, which reverts on failure:
+// Address.sendValue(payable(msg.sender), amount);</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F129: Unchecked send/transfer <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/naive-receiver/NaiveReceiverPool.sol:50</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>48 |
+  49 | // Transfer WETH and handle control to receiver
+> 50 | weth.transfer(address(receiver), amount);
+  51 | totalDeposits -= amount;
+  52 |</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>`send()` and `transfer()` return a boolean indicating success. If you don't check this return value, the function may silently fail, leading to incorrect contract state.</p>
+
+        <div class="label">Impact</div>
+        <p>Failed transfers could leave the contract in an inconsistent state, possibly locking funds or allowing users to withdraw more than they should.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Always check the return value of low level calls and revert on failure.
+function withdraw(uint256 amount) external {
+    require(balances[msg.sender] >= amount, "Insufficient");
+    balances[msg.sender] -= amount; // effects before interaction
+    (bool ok, ) = msg.sender.call{value: amount}("");
+    require(ok, "Transfer failed");
+}
+
+// Or use OpenZeppelin Address.sendValue, which reverts on failure:
+// Address.sendValue(payable(msg.sender), amount);</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F130: Unchecked send/transfer <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/naive-receiver/NaiveReceiverPool.sol:72</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>70 |
+  71 |     // Transfer ETH to designated receiver
+> 72 |     weth.transfer(receiver, amount);
+  73 | }
+  74 |</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>`send()` and `transfer()` return a boolean indicating success. If you don't check this return value, the function may silently fail, leading to incorrect contract state.</p>
+
+        <div class="label">Impact</div>
+        <p>Failed transfers could leave the contract in an inconsistent state, possibly locking funds or allowing users to withdraw more than they should.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Always check the return value of low level calls and revert on failure.
+function withdraw(uint256 amount) external {
+    require(balances[msg.sender] >= amount, "Insufficient");
+    balances[msg.sender] -= amount; // effects before interaction
+    (bool ok, ) = msg.sender.call{value: amount}("");
+    require(ok, "Transfer failed");
+}
+
+// Or use OpenZeppelin Address.sendValue, which reverts on failure:
+// Address.sendValue(payable(msg.sender), amount);</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F131: Missing zero-address check <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/withdrawal/L1Gateway.sol:34</span>
+        &nbsp;|&nbsp; <strong>Function:</strong> <span class="loc">finalizeWithdrawal</span></p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>32 | }
+  33 |
+> 34 | function finalizeWithdrawal(
+  35 |     uint256 nonce,
+  36 |     address l2Sender,</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>When setting an address (e.g., owner, token recipient), it's important to check for the zero address (0x0). Otherwise, tokens could be sent to a burn address or ownership could be lost.</p>
+
+        <div class="label">Impact</div>
+        <p>Tokens sent to zero address are permanently lost. Ownership could be transferred to zero address, locking the contract.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>require(to != address(0), "Invalid address");</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F132: Missing zero-address check <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/withdrawal/L1Forwarder.sol:37</span>
+        &nbsp;|&nbsp; <strong>Function:</strong> <span class="loc">forwardMessage</span></p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>35 | }
+  36 |
+> 37 | function forwardMessage(uint256 nonce, address l2Sender, address target, bytes memory message)
+  38 |     external
+  39 |     payable</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>When setting an address (e.g., owner, token recipient), it's important to check for the zero address (0x0). Otherwise, tokens could be sent to a burn address or ownership could be lost.</p>
+
+        <div class="label">Impact</div>
+        <p>Tokens sent to zero address are permanently lost. Ownership could be transferred to zero address, locking the contract.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>require(to != address(0), "Invalid address");</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F133: Missing zero-address check <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/puppet/PuppetPool.sol:30</span>
+        &nbsp;|&nbsp; <strong>Function:</strong> <span class="loc">borrow</span></p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>28 |
+  29 | // Allows borrowing tokens by first depositing two times their value in ETH
+> 30 | function borrow(uint256 amount, address recipient) external payable nonReentrant {
+  31 |     uint256 depositRequired = calculateDepositRequired(amount);
+  32 |</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>When setting an address (e.g., owner, token recipient), it's important to check for the zero address (0x0). Otherwise, tokens could be sent to a burn address or ownership could be lost.</p>
+
+        <div class="label">Impact</div>
+        <p>Tokens sent to zero address are permanently lost. Ownership could be transferred to zero address, locking the contract.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>require(to != address(0), "Invalid address");</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F134: Missing zero-address check <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/truster/TrusterLenderPool.sol:20</span>
+        &nbsp;|&nbsp; <strong>Function:</strong> <span class="loc">flashLoan</span></p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>18 | }
+  19 |
+> 20 | function flashLoan(uint256 amount, address borrower, address target, bytes calldata data)
+  21 |     external
+  22 |     nonReentrant</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>When setting an address (e.g., owner, token recipient), it's important to check for the zero address (0x0). Otherwise, tokens could be sent to a burn address or ownership could be lost.</p>
+
+        <div class="label">Impact</div>
+        <p>Tokens sent to zero address are permanently lost. Ownership could be transferred to zero address, locking the contract.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>require(to != address(0), "Invalid address");</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F135: Missing zero-address check <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/naive-receiver/NaiveReceiverPool.sol:66</span>
+        &nbsp;|&nbsp; <strong>Function:</strong> <span class="loc">withdraw</span></p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>64 | }
+  65 |
+> 66 | function withdraw(uint256 amount, address payable receiver) external {
+  67 |     // Reduce deposits
+  68 |     deposits[_msgSender()] -= amount;</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>When setting an address (e.g., owner, token recipient), it's important to check for the zero address (0x0). Otherwise, tokens could be sent to a burn address or ownership could be lost.</p>
+
+        <div class="label">Impact</div>
+        <p>Tokens sent to zero address are permanently lost. Ownership could be transferred to zero address, locking the contract.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>require(to != address(0), "Invalid address");</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F136: Missing zero-address check <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/damn-vulnerable-defi/src/naive-receiver/FlashLoanReceiver.sol:15</span>
+        &nbsp;|&nbsp; <strong>Function:</strong> <span class="loc">onFlashLoan</span></p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>13 | }
+  14 |
+> 15 | function onFlashLoan(address, address token, uint256 amount, uint256 fee, bytes calldata)
+  16 |     external
+  17 |     returns (bytes32)</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>When setting an address (e.g., owner, token recipient), it's important to check for the zero address (0x0). Otherwise, tokens could be sent to a burn address or ownership could be lost.</p>
+
+        <div class="label">Impact</div>
+        <p>Tokens sent to zero address are permanently lost. Ownership could be transferred to zero address, locking the contract.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>require(to != address(0), "Invalid address");</code></pre>
+
+        
+    </div>
+    
+
+    <h2>Simulation Metrics</h2>
+    <p><strong>Success Rate:</strong> N/A</p>
+    <p><strong>Total Exploits Attempted:</strong> 0</p>
+    
+
+    <h2>Additional Security Modules</h2>
+
+    <h3>Bytecode Verification</h3>
+    
+    <p>Not performed.</p>
+    
+
+    <h3>Dependency Vulnerabilities</h3>
+    
+    <p>No vulnerable dependencies found or scan not run.</p>
+    
+
+    <h3>Upgrade Safety</h3>
+    
+    <p>No upgrade safety issues detected.</p>
+    
+
+    <h3>Formal Verification</h3>
+    
+    <p>No formal verification issues found or not run.</p>
+    
+
+    <h3>Hawk-i Deep Agent Campaign</h3>
+    
+    <p>Deep agent not run.</p>
+    
+
+    <hr>
+    <p><em>Report generated by Hawk-i v1.0.0</em></p>
+</body>
+</html>

@@ -15,7 +15,7 @@ contract MysteryLogic {
 
     /**
      * @dev Transfer with a fee: fee = (amount / 100) * 2
-     * Problem: integer division truncates, leading to under‑collection of fees.
+     * Problem: integer division truncates, leading to under-collection of fees.
      * Example: amount = 199 => amount/100 = 1, fee = 2, but actual 2% of 199 = 3.98 → should be 4.
      * Also, balances are updated with subtraction before checking sufficient funds.
      */

@@ -16,7 +16,7 @@ contract ReentrancyDemo {
         uint256 bal = balances[msg.sender];
         require(bal > 0, "No funds");
 
-        // External call before state update – reentrancy possible
+        // External call before state update - reentrancy possible
         (bool success, ) = msg.sender.call{value: bal}("");
         require(success, "ETH transfer failed");
 

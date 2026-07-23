@@ -13,7 +13,7 @@ contract VulnerableToken {
     mapping(address => uint256) public balanceOf;
 
     function mint(uint256 amount) public {
-        // Unsafe addition – but in 0.8.x it would revert automatically.
+        // Unsafe addition - but in 0.8.x it would revert automatically.
         // To demonstrate overflow, we use unchecked.
         unchecked {
             balanceOf[msg.sender] += amount;

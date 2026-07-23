@@ -1,20 +1,20 @@
-# Contributing to Hawk‑i
+# Contributing to Hawk-i
 
-First off, thank you for considering contributing to Hawk‑i! 🎉 Your help is essential for making this project better, whether it’s fixing a bug, adding a new rule, improving documentation, or suggesting features.
+First off, thank you for considering contributing to Hawk-i. Your help is essential for making this project better, whether you are fixing a bug, adding a new rule, improving documentation, or suggesting features.
 
-We welcome contributions from everyone – seasoned Web3 developers, security researchers, or first‑time open‑source contributors. This guide will help you get started.
+We welcome contributions from everyone: seasoned Web3 developers, security researchers, and first-time open-source contributors. This guide will help you get started.
 
 ---
 
-## 📜 Code of Conduct
+## Code of Conduct
 
 By participating in this project, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md). Please be respectful, constructive, and considerate in all interactions.
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
-### 1. Fork & Clone
+### 1. Fork and Clone
 
 1. Fork the repository on GitHub.
 2. Clone your fork locally:
@@ -24,20 +24,22 @@ By participating in this project, you agree to abide by our [Code of Conduct](CO
    ```
 3. Add the original repository as an upstream remote:
    ```bash
-   git remote add upstream https://github.com/0xSemantic/hawki.git
+   git remote add upstream https://github.com/gethawki/hawki.git
    ```
 
-### 2. Set Up Development Environment
+### 2. Set Up the Development Environment
 
-Hawk‑i uses Python 3.9+ and relies on several dependencies. We recommend using a virtual environment:
+Hawk-i targets Python 3.9+. We recommend a virtual environment:
 
 ```bash
-python -m venv venv
-source venv/bin/activate   # On Windows: venv\Scripts\activate
-pip install -e .           # Install in editable mode
+python -m venv .venv
+source .venv/bin/activate   # On Windows: .venv\Scripts\activate
+pip install -e .            # Editable install
 ```
 
-If you plan to run the demo contracts or exploit sandbox, you’ll also need Node.js and Hardhat:
+For report generation extras, install `pip install -e ".[reports]"` (HTML and charts) or `pip install -e ".[all]"` (adds PDF support).
+
+If you plan to run the demo contracts or the exploit sandbox, you also need Node.js and Hardhat:
 
 ```bash
 cd demo
@@ -46,114 +48,112 @@ npm install
 
 ### 3. Run the Tests
 
-Ensure everything is working by running the test suite:
+`pytest` is not part of the editable install, so install it first, then run the suite from the project root:
 
 ```bash
-pytest tests/
+pip install pytest
+python -m pytest
 ```
 
-You should see all tests passing (or at least the ones that are not dependent on external APIs).
+External services (Docker, LLM providers, network) are mocked in the test suite. There are no skip guards, so a test that reached a real service would fail rather than skip.
+
+You can also run the linter (ruff ships with the dev environment):
+
+```bash
+ruff check .
+ruff format .
+```
 
 ---
 
-## 🧪 Development Workflow
-
-We follow a simple GitHub flow:
+## Development Workflow
 
 1. **Create a branch** for your work:
    ```bash
    git checkout -b feature/your-feature-name
    ```
-2. **Make your changes** – see the guidelines below.
+2. **Make your changes** following the guidelines below.
 3. **Write or update tests** to cover your changes.
-4. **Run the tests** again to ensure they pass.
-5. **Commit your changes** with a clear, descriptive message using [Conventional Commits](https://www.conventionalcommits.org/):
+4. **Run the tests** again to make sure they pass.
+5. **Commit** with a clear message. We use [Conventional Commits](https://www.conventionalcommits.org/):
    ```
    feat(rule): add reentrancy guard detection
    fix(parser): handle nested contract declarations
    docs(readme): update installation instructions
    ```
-6. **Push to your fork** and open a Pull Request against the `main` branch.
+6. **Push to your fork** and open a Pull Request against `main`.
 
 ---
 
-## 🧑‍💻 Coding Standards
+## Coding Standards
 
 ### Python
 
-- Follow [PEP 8](https://peps.python.org/pep-0008/) for code style.
-- Use **type hints** for all function signatures.
-- Write **docstrings** for modules, classes, and public methods (Google style preferred).
-- Keep functions small and focused; follow the **Single Responsibility Principle**.
-- Use **descriptive variable names**.
+- Follow [PEP 8](https://peps.python.org/pep-0008/).
+- Use type hints for all function signatures.
+- Write docstrings for modules, classes, and public methods.
+- Keep functions small and focused.
 
-### Solidity (for demo contracts and attack scripts)
+### Solidity (demo contracts and fixtures)
 
 - Follow the [Solidity Style Guide](https://docs.soliditylang.org/en/latest/style-guide.html).
-- Comment intentional vulnerabilities clearly (e.g., `// VULNERABILITY: reentrancy`).
+- Comment intentional vulnerabilities clearly (for example `// VULNERABILITY: reentrancy`).
 
-### Self‑Documenting Code
+### File Headers
 
-Every file must begin with a header comment describing its purpose, inputs, outputs, and dependencies. Example:
+Every file should begin with a short header comment describing its purpose. Example:
 
 ```python
 # --------------------
 # File: hawki/core/repo_intelligence/parser.py
 # --------------------
 """
-Solidity parser using tree‑sitter.
+Solidity parser using tree-sitter.
 Extracts contracts, functions, state variables, modifiers, and inheritance.
-Produces a structured representation for further analysis.
 """
 ```
 
-### Dynamic Discovery
+---
 
-If you add a new module that should be auto‑discovered, simply place it in the corresponding directory – the system will load it automatically. No manual registration needed.
+## Extending Hawk-i (Auto-Discovery)
 
-| Component               | Directory                                                |
-|-------------------------|----------------------------------------------------------|
-| Static rules            | `hawki/core/static_rule_engine/rules/`                   |
-| Prompt templates        | `hawki/core/ai_engine/prompt_templates/`                 |
-| Attack scripts          | `hawki/core/exploit_sandbox/attack_scripts/`             |
-| Watchers                | `hawki/core/monitoring/watchers/`                        |
-| Remediation templates   | `hawki/core/remediation_engine/templates/`               |
-| Report templates        | `hawki/core/data_layer/reporting/templates/`             |
+Most of Hawk-i is extended by dropping a file in the right directory. There is no central registry to edit, with one exception (exporters). Be aware that the discovery mechanism and the contract differ by directory:
+
+| Directory | Discovery mechanism | What your file must provide |
+|-----------|---------------------|-----------------------------|
+| `hawki/core/static_rule_engine/rules/` | Module scan for `BaseRule` subclasses | Subclass `BaseRule`, implement `run_check(contract_data) -> List[dict]` |
+| `hawki/core/formal/` | Module scan keyed by filename (the `--engine` value) | Subclass `Verifier`, implement `verify(...)` |
+| `hawki/core/monitoring/watchers/` | Glob for `Watcher` subclasses | Subclass `Watcher`, implement `check()`; the config key is the class name lowercased |
+| `hawki/core/ai_engine/prompt_templates/` | Glob for `*.json` (data, not code) | JSON with `system` and `user` keys, using `{single-brace}` placeholders |
+| `hawki/core/remediation_engine/templates/` | Glob for `*.json`, keyed by filename stem | The stem is the rule id; JSON needs a `fix_snippet` using `{{double-brace}}` placeholders |
+| `hawki/core/exploit_sandbox/attack_scripts/` | Glob for `*.py` (runtime protocol, no base class) | Read `CONTRACT_ADDRESSES` from the environment and print a JSON result as the last stdout line |
+| `hawki/core/exporters/` | Hardcoded dictionary in `exporters/registry.py` | The one exception: you must edit the registry manually |
+
+### The Name Coupling You Must Respect
+
+For a vulnerability that has a rule, a remediation template, and an attack script, the names have to line up across all three directories. The convention is:
+
+- Rule class `ReentrancyRule` produces the rule id `reentrancy` (class name minus `Rule`, lowercased).
+- The remediation template is `remediation_engine/templates/reentrancy.json`.
+- The attack script is `exploit_sandbox/attack_scripts/reentrancy_attack.py`.
+
+Use `static_rule_engine/rules/reentrancy.py` as the canonical example.
 
 ---
 
-## 🧪 Testing
+## Adding a New Static Rule
 
-- All new features should include tests.
-- Run the existing tests with:
-  ```bash
-  pytest tests/
-  ```
-- If you add a new rule, create a test in `tests/test_rules.py` or a dedicated file.
-- Mock external services (like LLM calls) to avoid flaky tests.
-- Aim for at least 85% test coverage overall.
+Every rule provides detection logic plus explanation, impact, and fix templates so reports are complete even when AI is disabled.
 
----
-
-## 🧩 Adding a New Static Rule
-
-As of v0.7.0, every rule must provide not only detection logic but also explanation, impact, and fix templates. This ensures reports are complete even when AI is disabled.
-
-1. Create a new `.py` file in `hawki/core/static_rule_engine/rules/`.
+1. Create a `.py` file in `hawki/core/static_rule_engine/rules/`.
 2. Define a class that inherits from `BaseRule` (imported from the `rules` package).
-3. **Required class attributes**:
-   - `severity` – one of `"Critical"`, `"High"`, `"Medium"`, `"Low"`.
-   - `explanation_template` – a string describing why the issue is dangerous.
-   - `impact_template` – a string describing potential consequences (fund loss, DoS, etc.).
-   - `fix_template` – a string with placeholders (e.g., `{{function}}`) for the remediation engine.
-4. Implement the `run_check(self, contract_data)` method. It should return a list of findings (dictionaries). Each finding must include at least:
-   - `"title"`: short description
-   - `"severity"`: same as class attribute (or override per finding)
-   - `"file"`: relative path
-   - `"line"`: line number
-   - `"vulnerable_snippet"`: the exact code lines
-   - (The `explanation`, `impact`, and `fix_snippet` fields will be populated automatically from the class attributes/remediation engine.)
-5. Write a unit test in `tests/test_rules.py` that verifies detection on a purposely vulnerable contract.
+3. Set the class attributes:
+   - `severity`: one of `"Critical"`, `"High"`, `"Medium"`, `"Low"`, `"Info"` (severities are normalized to Title case across the platform).
+   - `explanation_template`, `impact_template`, `fix_template`: strings; `fix_template` may contain placeholders.
+4. Implement `run_check(self, contract_data)`. It returns a list of finding dictionaries. Each finding should include at least:
+   - `title`, `severity`, `file`, `line`, `vulnerable_snippet`.
+   - The `explanation`, `impact`, and `fix_snippet` fields are merged in automatically from the class attributes and the remediation engine.
+5. Write a unit test in `tests/test_rules.py`.
 
 Example skeleton:
 
@@ -161,71 +161,52 @@ Example skeleton:
 # --------------------
 # File: hawki/core/static_rule_engine/rules/reentrancy.py
 # --------------------
+from typing import List, Dict, Any
 from . import BaseRule
 
 class ReentrancyRule(BaseRule):
     severity = "Critical"
-    explanation_template = "This function allows reentrant calls because it updates state after an external call."
+    explanation_template = "This function makes an external call before updating state."
     impact_template = "An attacker can drain funds by recursively calling back before state updates."
-    fix_template = "Apply the checks‑effects‑interactions pattern and add a nonReentrant modifier."
+    fix_template = "Apply the checks-effects-interactions pattern and add a nonReentrant modifier."
 
-    def run_check(self, contract_data):
+    def run_check(self, contract_data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         findings = []
         # ... detection logic ...
-        for match in detected:
-            findings.append({
-                "title": "Reentrancy in withdraw()",
-                "severity": self.severity,
-                "file": match.file,
-                "line": match.line,
-                "vulnerable_snippet": match.code,
-            })
         return findings
 ```
 
 ---
 
-## 💣 Adding a New Attack Script
+## Adding a New Attack Script
 
-Attack scripts are used by the exploit sandbox to simulate vulnerabilities. In v0.7.0, they must return structured data to be included in reports and influence the security score.
+Attack scripts are used by the exploit sandbox. They follow a runtime protocol; there is no base class to subclass.
 
-1. Create a `.py` file in `hawki/core/exploit_sandbox/attack_scripts/`.
-2. The script will be executed inside a Docker container with:
-   - A local Ethereum testnet (Anvil/Ganache) at `http://localhost:8545`.
-   - The vulnerable contract(s) already deployed.
-   - Environment variable `CONTRACT_ADDRESSES` containing a JSON dict of contract names to addresses.
-3. The script must output a JSON object (to stdout) with the following fields:
+1. Create a `.py` file in `hawki/core/exploit_sandbox/attack_scripts/`, named to match its rule id with an `_attack.py` suffix (for example `reentrancy_attack.py`).
+2. The script runs inside a Docker container with a local chain at `http://localhost:8545` and the vulnerable contracts deployed. The deployed addresses are available in the `CONTRACT_ADDRESSES` environment variable as a JSON map of contract name to address.
+3. The script must print a JSON object as the last line of stdout, with these fields:
    ```python
    {
        "success": bool,
-       "before_balance": int,      # e.g., attacker balance before
-       "after_balance": int,       # after exploit
+       "before_balance": int,
+       "after_balance": int,
        "gas_used": int,
-       "transaction_hash": str,    # optional
-       "logs": str                  # optional, human‑readable details
+       "transaction_hash": str,   # optional
+       "logs": str                # optional
    }
    ```
-4. Exit with code 0 on success (exploit worked) or non‑zero on failure (exploit failed or script error).
 
-You can use `web3.py` (pre‑installed in the sandbox image). Example skeleton:
+`web3.py` is available in the sandbox image. Example skeleton:
 
 ```python
 #!/usr/bin/env python3
-import os, json, sys
+import os, json
 from web3 import Web3
 
 w3 = Web3(Web3.HTTPProvider("http://localhost:8545"))
 contract_addresses = json.loads(os.environ["CONTRACT_ADDRESSES"])
-vault = w3.eth.contract(address=contract_addresses["Vault"], abi=...)
 
-attacker = w3.eth.accounts[1]
-before = w3.eth.get_balance(attacker)
-
-# perform exploit...
-tx_hash = vault.functions.attack().transact({'from': attacker})
-receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
-
-after = w3.eth.get_balance(attacker)
+# ... perform the exploit and measure balances ...
 
 result = {
     "success": True,
@@ -233,112 +214,116 @@ result = {
     "after_balance": after,
     "gas_used": receipt.gasUsed,
     "transaction_hash": tx_hash.hex(),
-    "logs": "Exploit succeeded"
+    "logs": "Exploit succeeded",
 }
 print(json.dumps(result))
 ```
 
 ---
 
-## 🤖 Adding a New Prompt Template
+## Adding a New Formal Verifier
+
+1. Create a `.py` file in `hawki/core/formal/`. The filename (munged) becomes the `--engine` value users pass to `hawki prove`.
+2. Define a class that inherits from `Verifier` and implement `verify(...)`.
+3. Warn clearly if an external tool the verifier depends on is missing, rather than failing hard.
+
+---
+
+## Adding a New Prompt Template
 
 1. Create a `.json` file in `hawki/core/ai_engine/prompt_templates/`.
-2. The JSON must contain `"system"` and `"user"` keys with string values.
-3. Use placeholders like `{variable_name}`; they will be replaced at runtime.
-4. Reference the template by its filename (without `.json`) in the code.
+2. Provide `system` and `user` string keys.
+3. Use single-brace placeholders like `{source_code}`; they are replaced at runtime.
+4. Reference the template by its filename (without `.json`).
 
-Example:
+---
+
+## Adding a New Remediation Template
+
+Remediation templates are JSON files in `hawki/core/remediation_engine/templates/`, named after the rule id (for example `reentrancy.json`).
+
+1. Create a `.json` file with a `fix_snippet` key.
+2. Use double-brace placeholders like `{{function_name}}`; the remediation engine fills them from AST context.
+
 ```json
 {
-  "system": "You are a Solidity expert...",
-  "user": "Analyse this contract: {source_code}"
+  "fix_snippet": "function {{function_name}}() {{visibility}} nonReentrant {\n    // checks-effects-interactions\n    {{state_updates}}\n    (bool success, ) = {{external_call}}.call{value: {{amount}}}(\"\");\n    require(success);\n}"
 }
 ```
 
 ---
 
-## 🛠️ Adding a New Remediation Template
-
-Remediation templates provide context‑aware fix snippets for vulnerabilities. They are JSON files placed in `hawki/core/remediation_engine/templates/`, named after the vulnerability (e.g., `reentrancy.json`).
-
-1. Create a `.json` file with the following structure:
-   ```json
-   {
-       "fix_snippet": "function {{function_name}}() {{visibility}} {\n    // Checks‑Effects‑Interactions\n    require({{condition}});\n    {{state_updates}}\n    (bool success, ) = {{external_call}}.call{value: {{amount}}}(\"\");\n    require(success);\n}"
-   }
-   ```
-2. Use double curly braces `{{placeholder}}` for variables that will be replaced by the remediation engine (using AST context).
-3. The filename should match the rule’s identifier (e.g., rule class name) or a common vulnerability name.
-
----
-
-## 📄 Adding a New Report Template
-
-Report templates control the layout of generated reports. They are stored in `hawki/core/data_layer/reporting/templates/` and can be Markdown, HTML, or JSON.
-
-1. Create a new template file (e.g., `custom_report.md`).
-2. Use placeholders like `{{executive_summary}}`, `{{findings_table}}`, etc. Refer to existing templates for available variables.
-3. To make the new format available, you may need to extend `ReportGeneratorV2` to handle it. For now, stick to the existing formats unless you’re willing to update the generator.
-
----
-
-## 👁️ Adding a New Watcher
+## Adding a New Watcher
 
 1. Create a `.py` file in `hawki/core/monitoring/watchers/`.
-2. Define a class that inherits from `Watcher` (from `..watcher_base`).
-3. Implement:
-   - `__init__(self, name, config)`: call `super().__init__` and store any config.
-   - `check(self)`: perform a single check. Return an event dictionary (with at least `"message"`) if something happened, else `None`.
-   - Optionally override `load_state`/`save_state` if you need persistent state.
-4. The watcher will be auto‑discovered and instantiated with config from the monitor’s configuration.
+2. Define a class that inherits from `Watcher`.
+3. Implement `check(self)`; return an event dictionary (with at least a `message`) when something happens, otherwise `None`. Optionally override state persistence.
+4. The watcher is auto-discovered and configured from the monitor config; its config key is the class name lowercased.
 
 ---
 
-## 📚 Documentation
+## Adding a New Exporter
 
-- Update the `README.md` if you change user‑facing functionality.
-- For new features, add a section in the relevant part of the documentation (e.g., `docs/`).
-- Keep docstrings up‑to‑date.
-- If you add a new rule, mention it in the list of supported vulnerabilities (e.g., in the docs or a separate file).
+Exporters are the one exception to auto-discovery.
+
+1. Create a class that inherits from `Exporter` in `hawki/core/exporters/`.
+2. Register it manually in `hawki/core/exporters/registry.py` by adding it to the `_EXPORTERS` dictionary.
+3. Keep the existing `structured` exporter's field names stable, since downstream tools depend on them.
 
 ---
 
-## 🐛 Reporting Bugs
+## Testing
 
-- Use the [GitHub Issues](https://github.com/0xSemantic/hawki/issues) page.
+- All new features should include tests.
+- Install pytest, then run `python -m pytest` from the project root.
+- If you add a rule, add a test in `tests/test_rules.py` or a dedicated file.
+- Mock external services (LLM calls, Docker, network) to keep tests deterministic.
+- Aim for at least 85% coverage overall.
+
+---
+
+## Documentation
+
+- Update `README.md` when you change user-facing functionality.
+- Add or update the relevant file under `docs/` for new features.
+- Keep docstrings current.
+
+---
+
+## Reporting Bugs
+
+- Use the [GitHub Issues](https://github.com/gethawki/hawki/issues) page.
 - Search existing issues to avoid duplicates.
-- Provide a clear title and description, steps to reproduce, expected vs. actual behaviour, and your environment (OS, Python version, Hawk‑i version).
+- Provide a clear title, steps to reproduce, expected vs. actual behaviour, and your environment (OS, Python version, Hawk-i version).
 
 ---
 
-## 💡 Suggesting Enhancements
+## Suggesting Enhancements
 
-- Open an issue with the label `enhancement`.
-- Describe the feature, why it’s useful, and (if possible) a rough implementation idea.
+- Open an issue with the `enhancement` label.
+- Describe the feature, why it is useful, and (if possible) a rough implementation idea.
 
 ---
 
-## 🔄 Pull Request Process
+## Pull Request Process
 
-1. Ensure your PR **describes the change** and links to any related issues.
-2. Make sure all tests pass and the code is formatted.
+1. Make sure your PR describes the change and links any related issues.
+2. Ensure all tests pass and the code is formatted.
 3. Update documentation if needed.
-4. The PR will be reviewed by maintainers. Be open to feedback and iterate.
+4. A maintainer will review, and you should be open to iterating on feedback.
 5. Once approved, a maintainer will merge it.
 
 ---
 
-## 🌍 Community
+## Community
 
-- Join the [Discussions](https://github.com/0xSemantic/hawki/discussions) for questions, ideas, and general chat.
-- Follow [@0xSemantic](https://twitter.com/0xSemantic) on Twitter for updates.
+- Join the [Discussions](https://github.com/gethawki/hawki/discussions) for questions and ideas.
+- Follow [@0xSemantic](https://twitter.com/0xSemantic) for updates.
 
 ---
 
-## 📄 License
+## License
 
 By contributing, you agree that your contributions will be licensed under the [MIT License](LICENSE).
 
----
-
-**Thank you for making Hawk‑i better!** 🦅
+Thank you for making Hawk-i better.

@@ -1,0 +1,13 @@
+{
+  "name": "RaceConditionWithdrawalAttack",
+  "description": "This attack exploits a race condition in the contract's withdrawal mechanism. If EtherStore processes withdrawal requests in a way that does not properly lock the state during execution, an attacker could initiate multiple withdrawal transactions in quick succession. By carefully timing these transactions, the attacker can create a scenario where the contract state is updated inconsistently, allowing multiple withdrawals before the state reflects the first transaction's completion. This can lead to draining more ether than the attacker is entitled to, as each transaction sees the balance before any withdrawal has occurred.",
+  "vulnerability_type": "race condition",
+  "steps": [
+    "Analyze the EtherStore contract to identify the function that handles withdrawals and check for any lack of state locking or atomic transaction handling.",
+    "Develop a script to initiate multiple withdrawal transactions in rapid succession, ensuring they are processed at nearly the same time.",
+    "Deploy the script to execute these transactions, exploiting the race condition to process multiple withdrawals before the state is correctly updated.",
+    "Monitor the contract's balance and transactions to ensure the attack results in withdrawing more ether than initially possible."
+  ],
+  "expected_impact": "The attacker can withdraw multiple times their legitimate balance, potentially draining the entire ether balance of the EtherStore contract.",
+  "estimated_tokens": 2018
+}

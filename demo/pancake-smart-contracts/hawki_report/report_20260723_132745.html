@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hawk-i Audit Report</title>
+    <style>
+        :root {
+            --steel: #687F97;
+            --ink: #0c0c0c;
+            --panel: #151515;
+            --panel-2: #1e1e1e;
+            --border: #2a2a2a;
+            --text: #e5e5e5;
+            --muted: #9aa4ad;
+        }
+        body {
+            background-color: var(--ink);
+            color: var(--text);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+        h1, h2, h3, h4 { color: var(--steel); }
+        h1 { margin-top: 0; }
+        a { color: var(--steel); }
+        pre {
+            background-color: var(--panel-2);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid var(--steel);
+            overflow-x: auto;
+        }
+        code { font-family: 'Fira Code', ui-monospace, monospace; color: #d4d4d4; }
+        table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+        th, td { border: 1px solid var(--border); padding: 0.5rem; text-align: left; }
+        th { background-color: var(--panel-2); color: var(--steel); }
+        .summary-box {
+            background-color: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .score { font-size: 2rem; font-weight: bold; }
+        .score.secure { color: #4CAF50; }
+        .score.minor-risk { color: #8BC34A; }
+        .score.moderate-risk { color: #FFC107; }
+        .score.high-risk { color: #FF9800; }
+        .score.critical-risk { color: #F44336; }
+        img { max-width: 100%; height: auto; border-radius: 0.5rem; }
+
+        .finding {
+            background-color: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .finding h3 { margin-top: 0; }
+        .finding .label {
+            color: var(--muted);
+            text-transform: uppercase;
+            font-size: 0.72rem;
+            letter-spacing: 0.06em;
+            margin: 1rem 0 0.25rem;
+            font-weight: 600;
+        }
+        .loc { font-family: 'Fira Code', ui-monospace, monospace; color: var(--text); }
+        .badge {
+            display: inline-block;
+            padding: 0.15rem 0.6rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            vertical-align: middle;
+        }
+        .badge.critical { background: #F44336; color: #fff; }
+        .badge.high { background: #FF9800; color: #1a1a1a; }
+        .badge.medium { background: #FFC107; color: #1a1a1a; }
+        .badge.low { background: #8BC34A; color: #1a1a1a; }
+        .badge.info { background: #687F97; color: #fff; }
+    </style>
+</head>
+<body>
+    <h1>Hawk-i Audit Report</h1>
+    <p><strong>Generated:</strong> 2026-07-23T13:27:45.378605Z</p>
+
+    <div class="summary-box">
+        <h2>Executive Summary</h2>
+        <ul>
+            <li><strong>Mode:</strong> minimal (AI: False, Sandbox: False)</li>
+            <li><strong>Repository:</strong> demo/pancake-smart-contracts/projects/farms-pools/contracts (local)</li>
+            <li><strong>Contracts Scanned:</strong> 13</li>
+            <li><strong>Files Analyzed:</strong> 13</li>
+            <li><strong>Total Findings:</strong> 41</li>
+            <li><strong>Severity Breakdown:</strong> Critical: 0, High: 2, Medium: 11, Low: 25, Info: 3</li>
+            <li><strong>Simulation Success Rate:</strong> N/A</li>
+            <li><strong>Security Score:</strong> <span class="score critical-risk">15/100 (Critical Risk)</span></li>
+        </ul>
+        
+        <p><em>AI reasoning was not enabled during this scan.</em></p>
+        
+        
+        <p><em>Exploit simulation was not executed.</em></p>
+        
+    </div>
+
+    <h2>Vulnerability Breakdown</h2>
+    <h3>Severity Distribution</h3>
+    
+    <img src="charts/severity_pie.png" alt="Severity Pie Chart">
+    
+
+    <h3>Vulnerability Types (Top 10)</h3>
+    
+    <img src="charts/type_bar.png" alt="Type Bar Chart">
+    
+
+    <h3>Severity Table</h3>
+    <table>
+        <thead><tr><th>Severity</th><th>Count</th></tr></thead>
+        <tbody>
+            <tr><td>Critical</td><td>0</td></tr>
+            <tr><td>High</td><td>2</td></tr>
+            <tr><td>Medium</td><td>11</td></tr>
+            <tr><td>Low</td><td>25</td></tr>
+            <tr><td>Info</td><td>3</td></tr>
+        </tbody>
+    </table>
+
+    <h2>Detailed Findings</h2>
+    <p>Each finding shows where the flaw is, the code responsible, why it is
+    dangerous, its impact, and a concrete fix.</p>
+
+    
+    <div class="finding">
+        <h3>F001: ERC20 approval race condition <span class="badge low">Low</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/libs/WBNB.sol:37</span>
+        &nbsp;|&nbsp; <strong>Function:</strong> <span class="loc">approve</span></p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>35 | }
+  36 |
+> 37 | function approve(address guy, uint256 wad) public returns (bool) {
+  38 |     allowance[msg.sender][guy] = wad;
+  39 |     emit Approval(msg.sender, guy, wad);</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>The standard ERC20 `approve` function is vulnerable to a race condition: if an owner changes allowance from N to M, and the spender submits a transfer before the new approval, they can spend N and then M, exceeding the intended limit.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker can spend more tokens than allowed, leading to theft.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>function approve(address spender, uint256 amount) public returns (bool) {
+    require((amount == 0) || (allowance[msg.sender][spender] == 0), "Use increaseAllowance instead");
+    allowance[msg.sender][spender] = amount;
+    emit Approval(msg.sender, spender, amount);
+    return true;
+}</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F002: Deprecated Solidity construct <span class="badge low">Low</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/CakeToken.sol:96</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>94 |     require(signatory != address(0), "CAKE::delegateBySig: invalid signature");
+  95 |     require(nonce == nonces[signatory]++, "CAKE::delegateBySig: invalid nonce");
+> 96 |     require(now <= expiry, "CAKE::delegateBySig: signature expired");
+  97 |     return _delegate(signatory, delegatee);
+  98 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>The contract uses a deprecated Solidity construct (`throw`, `sha3`, `suicide`, `var`, `block.blockhash` or `now`). These constructs have been superseded and removed in modern compiler versions, and their presence signals stale, unmaintained code that cannot compile on current toolchains.</p>
+
+        <div class="label">Impact</div>
+        <p>Deprecated constructs block compiler upgrades, may behave subtly differently from their replacements (e.g. `throw` consumes all remaining gas), and keep the contract tied to old compilers with known bugs.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Replace deprecated constructs with their modern equivalents: `throw` -> `revert()`, `sha3()` -> `keccak256()`, `suicide()` -> `selfdestruct()`, `var` -> explicit types, `block.blockhash()` -> `blockhash()`, `now` -> `block.timestamp`.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F003: Deprecated Solidity construct <span class="badge low">Low</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/SyrupBar.sol:119</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>117 |     require(signatory != address(0), "CAKE::delegateBySig: invalid signature");
+  118 |     require(nonce == nonces[signatory]++, "CAKE::delegateBySig: invalid nonce");
+> 119 |     require(now <= expiry, "CAKE::delegateBySig: signature expired");
+  120 |     return _delegate(signatory, delegatee);
+  121 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>The contract uses a deprecated Solidity construct (`throw`, `sha3`, `suicide`, `var`, `block.blockhash` or `now`). These constructs have been superseded and removed in modern compiler versions, and their presence signals stale, unmaintained code that cannot compile on current toolchains.</p>
+
+        <div class="label">Impact</div>
+        <p>Deprecated constructs block compiler upgrades, may behave subtly differently from their replacements (e.g. `throw` consumes all remaining gas), and keep the contract tied to old compilers with known bugs.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Replace deprecated constructs with their modern equivalents: `throw` -> `revert()`, `sha3()` -> `keccak256()`, `suicide()` -> `selfdestruct()`, `var` -> explicit types, `block.blockhash()` -> `blockhash()`, `now` -> `block.timestamp`.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F004: Floating pragma <span class="badge low">Low</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/libs/WBNB.sol:2</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>1 | // SPDX-License-Identifier: MIT
+> 2 | pragma solidity >0.4.18;
+  3 |
+  4 | contract WBNB {</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>The contract uses a floating pragma (a version range such as `^0.8.0` or `>=0.6.0`). The exact compiler version used for deployment is therefore not locked, so the contract may be compiled with a newer compiler than it was tested with, potentially introducing behavioral differences or new bugs.</p>
+
+        <div class="label">Impact</div>
+        <p>Deployments become non-reproducible: different compiler versions can produce different bytecode, and an untested compiler release may contain bugs or changed semantics that affect the contract.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Pin the pragma to the exact compiler version the contract was tested with, e.g. `pragma solidity 0.8.24;` instead of `pragma solidity ^0.8.24;`.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F005: Floating pragma <span class="badge low">Low</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/libs/CoinFactory.sol:2</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>1 | // SPDX-License-Identifier: MIT
+> 2 | pragma solidity ^0.6.12;
+  3 |
+  4 | import "@openzeppelin/contracts/access/Ownable.sol";</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>The contract uses a floating pragma (a version range such as `^0.8.0` or `>=0.6.0`). The exact compiler version used for deployment is therefore not locked, so the contract may be compiled with a newer compiler than it was tested with, potentially introducing behavioral differences or new bugs.</p>
+
+        <div class="label">Impact</div>
+        <p>Deployments become non-reproducible: different compiler versions can produce different bytecode, and an untested compiler release may contain bugs or changed semantics that affect the contract.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Pin the pragma to the exact compiler version the contract was tested with, e.g. `pragma solidity 0.8.24;` instead of `pragma solidity ^0.8.24;`.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F006: Potential front-running via block.timestamp/number <span class="badge low">Low</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/Timelock.sol:169</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>167 |     function getBlockTimestamp() internal view returns (uint256) {
+  168 |         // solium-disable-next-line security/no-block-members
+> 169 |         return block.timestamp;
+  170 |     }
+  171 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Using `block.timestamp` or `block.number` for critical logic can allow miners or bots to front-run transactions by manipulating the block parameters or ordering.</p>
+
+        <div class="label">Impact</div>
+        <p>Attackers can exploit front-running to gain unfair advantage, e.g., by seeing a pending trade and inserting their own transaction first.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Add slippage protection and, where ordering matters, commit reveal.
+function swap(uint amountIn, uint minAmountOut, uint deadline) external {
+    require(block.timestamp <= deadline, "Expired");
+    uint amountOut = _swap(amountIn);
+    require(amountOut >= minAmountOut, "Slippage exceeded");
+}
+
+// Commit reveal for order sensitive actions:
+// 1. commit(keccak256(abi.encode(value, salt)))
+// 2. later reveal(value, salt) and verify the stored hash.
+// Consider private mempools or batch auctions to remove ordering advantage.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F007: Potential front-running via block.timestamp/number <span class="badge low">Low</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/SmartChefInitializable.sol:221</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>219 |  */
+  220 | function stopReward() external onlyOwner {
+> 221 |     bonusEndBlock = block.number;
+  222 | }
+  223 |</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Using `block.timestamp` or `block.number` for critical logic can allow miners or bots to front-run transactions by manipulating the block parameters or ordering.</p>
+
+        <div class="label">Impact</div>
+        <p>Attackers can exploit front-running to gain unfair advantage, e.g., by seeing a pending trade and inserting their own transaction first.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Add slippage protection and, where ordering matters, commit reveal.
+function swap(uint amountIn, uint minAmountOut, uint deadline) external {
+    require(block.timestamp <= deadline, "Expired");
+    uint amountOut = _swap(amountIn);
+    require(amountOut >= minAmountOut, "Slippage exceeded");
+}
+
+// Commit reveal for order sensitive actions:
+// 1. commit(keccak256(abi.encode(value, salt)))
+// 2. later reveal(value, salt) and verify the stored hash.
+// Consider private mempools or batch auctions to remove ordering advantage.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F008: Potential front-running via block.timestamp/number <span class="badge low">Low</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/CakeToken.sol:118</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>116 |  */
+  117 | function getPriorVotes(address account, uint256 blockNumber) external view returns (uint256) {
+> 118 |     require(blockNumber < block.number, "CAKE::getPriorVotes: not yet determined");
+  119 |
+  120 |     uint32 nCheckpoints = numCheckpoints[account];</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Using `block.timestamp` or `block.number` for critical logic can allow miners or bots to front-run transactions by manipulating the block parameters or ordering.</p>
+
+        <div class="label">Impact</div>
+        <p>Attackers can exploit front-running to gain unfair advantage, e.g., by seeing a pending trade and inserting their own transaction first.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Add slippage protection and, where ordering matters, commit reveal.
+function swap(uint amountIn, uint minAmountOut, uint deadline) external {
+    require(block.timestamp <= deadline, "Expired");
+    uint amountOut = _swap(amountIn);
+    require(amountOut >= minAmountOut, "Slippage exceeded");
+}
+
+// Commit reveal for order sensitive actions:
+// 1. commit(keccak256(abi.encode(value, salt)))
+// 2. later reveal(value, salt) and verify the stored hash.
+// Consider private mempools or batch auctions to remove ordering advantage.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F009: Potential front-running via block.timestamp/number <span class="badge low">Low</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/SmartChef.sol:204</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>202 |  */
+  203 | function stopReward() external onlyOwner {
+> 204 |     bonusEndBlock = block.number;
+  205 | }
+  206 |</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Using `block.timestamp` or `block.number` for critical logic can allow miners or bots to front-run transactions by manipulating the block parameters or ordering.</p>
+
+        <div class="label">Impact</div>
+        <p>Attackers can exploit front-running to gain unfair advantage, e.g., by seeing a pending trade and inserting their own transaction first.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Add slippage protection and, where ordering matters, commit reveal.
+function swap(uint amountIn, uint minAmountOut, uint deadline) external {
+    require(block.timestamp <= deadline, "Expired");
+    uint amountOut = _swap(amountIn);
+    require(amountOut >= minAmountOut, "Slippage exceeded");
+}
+
+// Commit reveal for order sensitive actions:
+// 1. commit(keccak256(abi.encode(value, salt)))
+// 2. later reveal(value, salt) and verify the stored hash.
+// Consider private mempools or batch auctions to remove ordering advantage.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F010: Potential front-running via block.timestamp/number <span class="badge low">Low</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/SyrupBar.sol:141</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>139 |  */
+  140 | function getPriorVotes(address account, uint256 blockNumber) external view returns (uint256) {
+> 141 |     require(blockNumber < block.number, "CAKE::getPriorVotes: not yet determined");
+  142 |
+  143 |     uint32 nCheckpoints = numCheckpoints[account];</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Using `block.timestamp` or `block.number` for critical logic can allow miners or bots to front-run transactions by manipulating the block parameters or ordering.</p>
+
+        <div class="label">Impact</div>
+        <p>Attackers can exploit front-running to gain unfair advantage, e.g., by seeing a pending trade and inserting their own transaction first.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Add slippage protection and, where ordering matters, commit reveal.
+function swap(uint amountIn, uint minAmountOut, uint deadline) external {
+    require(block.timestamp <= deadline, "Expired");
+    uint amountOut = _swap(amountIn);
+    require(amountOut >= minAmountOut, "Slippage exceeded");
+}
+
+// Commit reveal for order sensitive actions:
+// 1. commit(keccak256(abi.encode(value, salt)))
+// 2. later reveal(value, salt) and verify the stored hash.
+// Consider private mempools or batch auctions to remove ordering advantage.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F011: Potential front-running via block.timestamp/number <span class="badge low">Low</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/BnbStaking.sol:131</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>129 | uint256 accCakePerShare = pool.accCakePerShare;
+  130 | uint256 lpSupply = pool.lpToken.balanceOf(address(this));
+> 131 | if (block.number > pool.lastRewardBlock && lpSupply != 0) {
+  132 |     uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
+  133 |     uint256 cakeReward = multiplier.mul(rewardPerBlock).mul(pool.allocPoint).div(totalAllocPoint);</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Using `block.timestamp` or `block.number` for critical logic can allow miners or bots to front-run transactions by manipulating the block parameters or ordering.</p>
+
+        <div class="label">Impact</div>
+        <p>Attackers can exploit front-running to gain unfair advantage, e.g., by seeing a pending trade and inserting their own transaction first.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Add slippage protection and, where ordering matters, commit reveal.
+function swap(uint amountIn, uint minAmountOut, uint deadline) external {
+    require(block.timestamp <= deadline, "Expired");
+    uint amountOut = _swap(amountIn);
+    require(amountOut >= minAmountOut, "Slippage exceeded");
+}
+
+// Commit reveal for order sensitive actions:
+// 1. commit(keccak256(abi.encode(value, salt)))
+// 2. later reveal(value, salt) and verify the stored hash.
+// Consider private mempools or batch auctions to remove ordering advantage.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F012: Potential front-running via block.timestamp/number <span class="badge low">Low</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/MasterChef.sol:126</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>124 |     massUpdatePools();
+  125 | }
+> 126 | uint256 lastRewardBlock = block.number > startBlock ? block.number : startBlock;
+  127 | totalAllocPoint = totalAllocPoint.add(_allocPoint);
+  128 | poolInfo.push(</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Using `block.timestamp` or `block.number` for critical logic can allow miners or bots to front-run transactions by manipulating the block parameters or ordering.</p>
+
+        <div class="label">Impact</div>
+        <p>Attackers can exploit front-running to gain unfair advantage, e.g., by seeing a pending trade and inserting their own transaction first.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Add slippage protection and, where ordering matters, commit reveal.
+function swap(uint amountIn, uint minAmountOut, uint deadline) external {
+    require(block.timestamp <= deadline, "Expired");
+    uint amountOut = _swap(amountIn);
+    require(amountOut >= minAmountOut, "Slippage exceeded");
+}
+
+// Commit reveal for order sensitive actions:
+// 1. commit(keccak256(abi.encode(value, salt)))
+// 2. later reveal(value, salt) and verify the stored hash.
+// Consider private mempools or batch auctions to remove ordering advantage.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F013: Inline assembly used <span class="badge info">Info</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/SmartChefFactory.sol:44</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>42 | address smartChefAddress;
+  43 |
+> 44 | assembly {
+  45 |     smartChefAddress := create2(0, add(bytecode, 32), mload(bytecode), salt)
+  46 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>The contract contains an inline `assembly` block. Assembly bypasses Solidity's type system, overflow checks and memory-safety guarantees, so any mistake inside the block goes undetected by the compiler.</p>
+
+        <div class="label">Impact</div>
+        <p>Errors in hand-written assembly (wrong memory offsets, missing checks, unchecked external call results) can corrupt state or leak funds without any compiler warning. This is informational; assembly is often legitimate.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Prefer high-level Solidity where possible. If assembly is required, keep the block minimal, mark it `memory-safe` when applicable, document the invariants it relies on, and cover it with targeted tests.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F014: Inline assembly used <span class="badge info">Info</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/CakeToken.sol:210</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>208 | function getChainId() internal pure returns (uint256) {
+  209 |     uint256 chainId;
+> 210 |     assembly {
+  211 |         chainId := chainid()
+  212 |     }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>The contract contains an inline `assembly` block. Assembly bypasses Solidity's type system, overflow checks and memory-safety guarantees, so any mistake inside the block goes undetected by the compiler.</p>
+
+        <div class="label">Impact</div>
+        <p>Errors in hand-written assembly (wrong memory offsets, missing checks, unchecked external call results) can corrupt state or leak funds without any compiler warning. This is informational; assembly is often legitimate.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Prefer high-level Solidity where possible. If assembly is required, keep the block minimal, mark it `memory-safe` when applicable, document the invariants it relies on, and cover it with targeted tests.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F015: Inline assembly used <span class="badge info">Info</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/SyrupBar.sol:233</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>231 | function getChainId() internal pure returns (uint256) {
+  232 |     uint256 chainId;
+> 233 |     assembly {
+  234 |         chainId := chainid()
+  235 |     }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>The contract contains an inline `assembly` block. Assembly bypasses Solidity's type system, overflow checks and memory-safety guarantees, so any mistake inside the block goes undetected by the compiler.</p>
+
+        <div class="label">Impact</div>
+        <p>Errors in hand-written assembly (wrong memory offsets, missing checks, unchecked external call results) can corrupt state or leak funds without any compiler warning. This is informational; assembly is often legitimate.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Prefer high-level Solidity where possible. If assembly is required, keep the block minimal, mark it `memory-safe` when applicable, document the invariants it relies on, and cover it with targeted tests.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F016: Possible missing input validation <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/BnbStaking.sol:141</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>139 | // Update reward variables of the given pool to be up-to-date.
+  140 | function updatePool(uint256 _pid) public {
+> 141 |     PoolInfo storage pool = poolInfo[_pid];
+  142 |     if (block.number <= pool.lastRewardBlock) {
+  143 |         return;</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>User-supplied inputs should be validated to prevent out-of-bounds errors, integer overflows, or unexpected behavior. Missing checks can lead to vulnerabilities like underflows or access to invalid indices.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could supply values that cause array index errors, arithmetic issues, or bypass logic.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>require(index < array.length, "Index out of bounds");
+require(amount > 0, "Amount must be positive");</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F017: Possible missing input validation <span class="badge high">High</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/MasterChef.sol:143</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>141 |     massUpdatePools();
+  142 | }
+> 143 | uint256 prevAllocPoint = poolInfo[_pid].allocPoint;
+  144 | poolInfo[_pid].allocPoint = _allocPoint;
+  145 | if (prevAllocPoint != _allocPoint) {</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>User-supplied inputs should be validated to prevent out-of-bounds errors, integer overflows, or unexpected behavior. Missing checks can lead to vulnerabilities like underflows or access to invalid indices.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could supply values that cause array index errors, arithmetic issues, or bypass logic.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>require(index < array.length, "Index out of bounds");
+require(amount > 0, "Amount must be positive");</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F018: Potential integer overflow/underflow <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/SmartChefFactory.sol:1</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>> 1 | // SPDX-License-Identifier: MIT
+  2 | pragma solidity 0.6.12;
+  3 |</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Arithmetic operations in Solidity versions prior to 0.8.0 can overflow/underflow silently, leading to incorrect balances or logic. Even in 0.8.x, `unchecked` blocks can reintroduce overflow.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could manipulate arithmetic to gain unexpected tokens or break contract invariants.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Use Solidity >= 0.8.0 so arithmetic reverts on overflow by default.
+pragma solidity ^0.8.20;
+
+function transfer(address to, uint256 amount) external {
+    // These now revert automatically on underflow/overflow:
+    balances[msg.sender] -= amount;
+    balances[to] += amount;
+}
+
+// For Solidity < 0.8, use OpenZeppelin SafeMath:
+// using SafeMath for uint256;
+// balances[msg.sender] = balances[msg.sender].sub(amount);
+// Only use unchecked { } when you have proven the bounds are safe.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F019: Potential integer overflow/underflow <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/CakeToken.sol:1</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>> 1 | // SPDX-License-Identifier: MIT
+  2 | pragma solidity 0.6.12;
+  3 |</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Arithmetic operations in Solidity versions prior to 0.8.0 can overflow/underflow silently, leading to incorrect balances or logic. Even in 0.8.x, `unchecked` blocks can reintroduce overflow.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could manipulate arithmetic to gain unexpected tokens or break contract invariants.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Use Solidity >= 0.8.0 so arithmetic reverts on overflow by default.
+pragma solidity ^0.8.20;
+
+function transfer(address to, uint256 amount) external {
+    // These now revert automatically on underflow/overflow:
+    balances[msg.sender] -= amount;
+    balances[to] += amount;
+}
+
+// For Solidity < 0.8, use OpenZeppelin SafeMath:
+// using SafeMath for uint256;
+// balances[msg.sender] = balances[msg.sender].sub(amount);
+// Only use unchecked { } when you have proven the bounds are safe.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F020: Potential integer overflow/underflow <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/SyrupBar.sol:1</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>> 1 | // SPDX-License-Identifier: MIT
+  2 | pragma solidity 0.6.12;
+  3 |</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Arithmetic operations in Solidity versions prior to 0.8.0 can overflow/underflow silently, leading to incorrect balances or logic. Even in 0.8.x, `unchecked` blocks can reintroduce overflow.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could manipulate arithmetic to gain unexpected tokens or break contract invariants.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Use Solidity >= 0.8.0 so arithmetic reverts on overflow by default.
+pragma solidity ^0.8.20;
+
+function transfer(address to, uint256 amount) external {
+    // These now revert automatically on underflow/overflow:
+    balances[msg.sender] -= amount;
+    balances[to] += amount;
+}
+
+// For Solidity < 0.8, use OpenZeppelin SafeMath:
+// using SafeMath for uint256;
+// balances[msg.sender] = balances[msg.sender].sub(amount);
+// Only use unchecked { } when you have proven the bounds are safe.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F021: Potential integer overflow/underflow <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/libs/WBNB.sol:1</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>> 1 | // SPDX-License-Identifier: MIT
+  2 | pragma solidity >0.4.18;
+  3 |</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Arithmetic operations in Solidity versions prior to 0.8.0 can overflow/underflow silently, leading to incorrect balances or logic. Even in 0.8.x, `unchecked` blocks can reintroduce overflow.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could manipulate arithmetic to gain unexpected tokens or break contract invariants.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Use Solidity >= 0.8.0 so arithmetic reverts on overflow by default.
+pragma solidity ^0.8.20;
+
+function transfer(address to, uint256 amount) external {
+    // These now revert automatically on underflow/overflow:
+    balances[msg.sender] -= amount;
+    balances[to] += amount;
+}
+
+// For Solidity < 0.8, use OpenZeppelin SafeMath:
+// using SafeMath for uint256;
+// balances[msg.sender] = balances[msg.sender].sub(amount);
+// Only use unchecked { } when you have proven the bounds are safe.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F022: Potential integer overflow/underflow <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/libs/MockBEP20.sol:1</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>> 1 | // SPDX-License-Identifier: MIT
+  2 | pragma solidity 0.6.12;
+  3 |</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Arithmetic operations in Solidity versions prior to 0.8.0 can overflow/underflow silently, leading to incorrect balances or logic. Even in 0.8.x, `unchecked` blocks can reintroduce overflow.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could manipulate arithmetic to gain unexpected tokens or break contract invariants.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Use Solidity >= 0.8.0 so arithmetic reverts on overflow by default.
+pragma solidity ^0.8.20;
+
+function transfer(address to, uint256 amount) external {
+    // These now revert automatically on underflow/overflow:
+    balances[msg.sender] -= amount;
+    balances[to] += amount;
+}
+
+// For Solidity < 0.8, use OpenZeppelin SafeMath:
+// using SafeMath for uint256;
+// balances[msg.sender] = balances[msg.sender].sub(amount);
+// Only use unchecked { } when you have proven the bounds are safe.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F023: Potential integer overflow/underflow <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/libs/MockERC20.sol:1</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>> 1 | // SPDX-License-Identifier: MIT
+  2 | pragma solidity 0.6.12;
+  3 |</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Arithmetic operations in Solidity versions prior to 0.8.0 can overflow/underflow silently, leading to incorrect balances or logic. Even in 0.8.x, `unchecked` blocks can reintroduce overflow.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could manipulate arithmetic to gain unexpected tokens or break contract invariants.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Use Solidity >= 0.8.0 so arithmetic reverts on overflow by default.
+pragma solidity ^0.8.20;
+
+function transfer(address to, uint256 amount) external {
+    // These now revert automatically on underflow/overflow:
+    balances[msg.sender] -= amount;
+    balances[to] += amount;
+}
+
+// For Solidity < 0.8, use OpenZeppelin SafeMath:
+// using SafeMath for uint256;
+// balances[msg.sender] = balances[msg.sender].sub(amount);
+// Only use unchecked { } when you have proven the bounds are safe.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F024: Potential integer overflow/underflow <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/libs/CoinFactory.sol:1</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>> 1 | // SPDX-License-Identifier: MIT
+  2 | pragma solidity ^0.6.12;
+  3 |</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Arithmetic operations in Solidity versions prior to 0.8.0 can overflow/underflow silently, leading to incorrect balances or logic. Even in 0.8.x, `unchecked` blocks can reintroduce overflow.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could manipulate arithmetic to gain unexpected tokens or break contract invariants.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Use Solidity >= 0.8.0 so arithmetic reverts on overflow by default.
+pragma solidity ^0.8.20;
+
+function transfer(address to, uint256 amount) external {
+    // These now revert automatically on underflow/overflow:
+    balances[msg.sender] -= amount;
+    balances[to] += amount;
+}
+
+// For Solidity < 0.8, use OpenZeppelin SafeMath:
+// using SafeMath for uint256;
+// balances[msg.sender] = balances[msg.sender].sub(amount);
+// Only use unchecked { } when you have proven the bounds are safe.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F025: Potential integer overflow/underflow <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/libs/MockCoin.sol:1</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>> 1 | // SPDX-License-Identifier: MIT
+  2 | pragma solidity 0.6.12;
+  3 |</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>Arithmetic operations in Solidity versions prior to 0.8.0 can overflow/underflow silently, leading to incorrect balances or logic. Even in 0.8.x, `unchecked` blocks can reintroduce overflow.</p>
+
+        <div class="label">Impact</div>
+        <p>An attacker could manipulate arithmetic to gain unexpected tokens or break contract invariants.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Use Solidity >= 0.8.0 so arithmetic reverts on overflow by default.
+pragma solidity ^0.8.20;
+
+function transfer(address to, uint256 amount) external {
+    // These now revert automatically on underflow/overflow:
+    balances[msg.sender] -= amount;
+    balances[to] += amount;
+}
+
+// For Solidity < 0.8, use OpenZeppelin SafeMath:
+// using SafeMath for uint256;
+// balances[msg.sender] = balances[msg.sender].sub(amount);
+// Only use unchecked { } when you have proven the bounds are safe.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F026: Outdated Solidity version <span class="badge low">Low</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/Timelock.sol:11</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>9 | //
+  10 |
+> 11 | pragma solidity 0.6.12;
+  12 |
+  13 | import "@openzeppelin/contracts/math/SafeMath.sol";</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>The contract targets a Solidity compiler older than 0.8. Pre-0.8 compilers do not perform automatic arithmetic overflow/underflow checks and lack numerous compiler bug fixes and safety improvements introduced since.</p>
+
+        <div class="label">Impact</div>
+        <p>Arithmetic silently wraps on overflow/underflow unless a library like SafeMath is used consistently, and the contract remains exposed to known bugs fixed in newer compiler releases.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Upgrade the contract to a modern compiler, e.g. `pragma solidity 0.8.24;`, and re-test: 0.8+ reverts on arithmetic overflow/underflow by default.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F027: Outdated Solidity version <span class="badge low">Low</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/SmartChefFactory.sol:2</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>1 | // SPDX-License-Identifier: MIT
+> 2 | pragma solidity 0.6.12;
+  3 |
+  4 | import "@openzeppelin/contracts/access/Ownable.sol";</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>The contract targets a Solidity compiler older than 0.8. Pre-0.8 compilers do not perform automatic arithmetic overflow/underflow checks and lack numerous compiler bug fixes and safety improvements introduced since.</p>
+
+        <div class="label">Impact</div>
+        <p>Arithmetic silently wraps on overflow/underflow unless a library like SafeMath is used consistently, and the contract remains exposed to known bugs fixed in newer compiler releases.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Upgrade the contract to a modern compiler, e.g. `pragma solidity 0.8.24;`, and re-test: 0.8+ reverts on arithmetic overflow/underflow by default.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F028: Outdated Solidity version <span class="badge low">Low</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/SmartChefInitializable.sol:2</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>1 | // SPDX-License-Identifier: MIT
+> 2 | pragma solidity 0.6.12;
+  3 |
+  4 | import "@openzeppelin/contracts/access/Ownable.sol";</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>The contract targets a Solidity compiler older than 0.8. Pre-0.8 compilers do not perform automatic arithmetic overflow/underflow checks and lack numerous compiler bug fixes and safety improvements introduced since.</p>
+
+        <div class="label">Impact</div>
+        <p>Arithmetic silently wraps on overflow/underflow unless a library like SafeMath is used consistently, and the contract remains exposed to known bugs fixed in newer compiler releases.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Upgrade the contract to a modern compiler, e.g. `pragma solidity 0.8.24;`, and re-test: 0.8+ reverts on arithmetic overflow/underflow by default.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F029: Outdated Solidity version <span class="badge low">Low</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/CakeToken.sol:2</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>1 | // SPDX-License-Identifier: MIT
+> 2 | pragma solidity 0.6.12;
+  3 |
+  4 | import "bsc-library/contracts/BEP20.sol";</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>The contract targets a Solidity compiler older than 0.8. Pre-0.8 compilers do not perform automatic arithmetic overflow/underflow checks and lack numerous compiler bug fixes and safety improvements introduced since.</p>
+
+        <div class="label">Impact</div>
+        <p>Arithmetic silently wraps on overflow/underflow unless a library like SafeMath is used consistently, and the contract remains exposed to known bugs fixed in newer compiler releases.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Upgrade the contract to a modern compiler, e.g. `pragma solidity 0.8.24;`, and re-test: 0.8+ reverts on arithmetic overflow/underflow by default.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F030: Outdated Solidity version <span class="badge low">Low</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/SmartChef.sol:2</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>1 | // SPDX-License-Identifier: MIT
+> 2 | pragma solidity 0.6.12;
+  3 |
+  4 | import "@openzeppelin/contracts/access/Ownable.sol";</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>The contract targets a Solidity compiler older than 0.8. Pre-0.8 compilers do not perform automatic arithmetic overflow/underflow checks and lack numerous compiler bug fixes and safety improvements introduced since.</p>
+
+        <div class="label">Impact</div>
+        <p>Arithmetic silently wraps on overflow/underflow unless a library like SafeMath is used consistently, and the contract remains exposed to known bugs fixed in newer compiler releases.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Upgrade the contract to a modern compiler, e.g. `pragma solidity 0.8.24;`, and re-test: 0.8+ reverts on arithmetic overflow/underflow by default.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F031: Outdated Solidity version <span class="badge low">Low</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/SyrupBar.sol:2</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>1 | // SPDX-License-Identifier: MIT
+> 2 | pragma solidity 0.6.12;
+  3 |
+  4 | import "bsc-library/contracts/BEP20.sol";</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>The contract targets a Solidity compiler older than 0.8. Pre-0.8 compilers do not perform automatic arithmetic overflow/underflow checks and lack numerous compiler bug fixes and safety improvements introduced since.</p>
+
+        <div class="label">Impact</div>
+        <p>Arithmetic silently wraps on overflow/underflow unless a library like SafeMath is used consistently, and the contract remains exposed to known bugs fixed in newer compiler releases.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Upgrade the contract to a modern compiler, e.g. `pragma solidity 0.8.24;`, and re-test: 0.8+ reverts on arithmetic overflow/underflow by default.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F032: Outdated Solidity version <span class="badge low">Low</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/BnbStaking.sol:2</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>1 | // SPDX-License-Identifier: MIT
+> 2 | pragma solidity 0.6.12;
+  3 |
+  4 | import "@openzeppelin/contracts/access/Ownable.sol";</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>The contract targets a Solidity compiler older than 0.8. Pre-0.8 compilers do not perform automatic arithmetic overflow/underflow checks and lack numerous compiler bug fixes and safety improvements introduced since.</p>
+
+        <div class="label">Impact</div>
+        <p>Arithmetic silently wraps on overflow/underflow unless a library like SafeMath is used consistently, and the contract remains exposed to known bugs fixed in newer compiler releases.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Upgrade the contract to a modern compiler, e.g. `pragma solidity 0.8.24;`, and re-test: 0.8+ reverts on arithmetic overflow/underflow by default.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F033: Outdated Solidity version <span class="badge low">Low</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/MasterChef.sol:2</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>1 | // SPDX-License-Identifier: MIT
+> 2 | pragma solidity 0.6.12;
+  3 |
+  4 | import "@openzeppelin/contracts/access/Ownable.sol";</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>The contract targets a Solidity compiler older than 0.8. Pre-0.8 compilers do not perform automatic arithmetic overflow/underflow checks and lack numerous compiler bug fixes and safety improvements introduced since.</p>
+
+        <div class="label">Impact</div>
+        <p>Arithmetic silently wraps on overflow/underflow unless a library like SafeMath is used consistently, and the contract remains exposed to known bugs fixed in newer compiler releases.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Upgrade the contract to a modern compiler, e.g. `pragma solidity 0.8.24;`, and re-test: 0.8+ reverts on arithmetic overflow/underflow by default.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F034: Outdated Solidity version <span class="badge low">Low</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/libs/WBNB.sol:2</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>1 | // SPDX-License-Identifier: MIT
+> 2 | pragma solidity >0.4.18;
+  3 |
+  4 | contract WBNB {</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>The contract targets a Solidity compiler older than 0.8. Pre-0.8 compilers do not perform automatic arithmetic overflow/underflow checks and lack numerous compiler bug fixes and safety improvements introduced since.</p>
+
+        <div class="label">Impact</div>
+        <p>Arithmetic silently wraps on overflow/underflow unless a library like SafeMath is used consistently, and the contract remains exposed to known bugs fixed in newer compiler releases.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Upgrade the contract to a modern compiler, e.g. `pragma solidity 0.8.24;`, and re-test: 0.8+ reverts on arithmetic overflow/underflow by default.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F035: Outdated Solidity version <span class="badge low">Low</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/libs/MockBEP20.sol:2</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>1 | // SPDX-License-Identifier: MIT
+> 2 | pragma solidity 0.6.12;
+  3 |
+  4 | import "bsc-library/contracts/BEP20.sol";</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>The contract targets a Solidity compiler older than 0.8. Pre-0.8 compilers do not perform automatic arithmetic overflow/underflow checks and lack numerous compiler bug fixes and safety improvements introduced since.</p>
+
+        <div class="label">Impact</div>
+        <p>Arithmetic silently wraps on overflow/underflow unless a library like SafeMath is used consistently, and the contract remains exposed to known bugs fixed in newer compiler releases.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Upgrade the contract to a modern compiler, e.g. `pragma solidity 0.8.24;`, and re-test: 0.8+ reverts on arithmetic overflow/underflow by default.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F036: Outdated Solidity version <span class="badge low">Low</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/libs/MockERC20.sol:2</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>1 | // SPDX-License-Identifier: MIT
+> 2 | pragma solidity 0.6.12;
+  3 |
+  4 | import "@openzeppelin/contracts/token/ERC20/ERC20.sol";</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>The contract targets a Solidity compiler older than 0.8. Pre-0.8 compilers do not perform automatic arithmetic overflow/underflow checks and lack numerous compiler bug fixes and safety improvements introduced since.</p>
+
+        <div class="label">Impact</div>
+        <p>Arithmetic silently wraps on overflow/underflow unless a library like SafeMath is used consistently, and the contract remains exposed to known bugs fixed in newer compiler releases.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Upgrade the contract to a modern compiler, e.g. `pragma solidity 0.8.24;`, and re-test: 0.8+ reverts on arithmetic overflow/underflow by default.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F037: Outdated Solidity version <span class="badge low">Low</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/libs/CoinFactory.sol:2</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>1 | // SPDX-License-Identifier: MIT
+> 2 | pragma solidity ^0.6.12;
+  3 |
+  4 | import "@openzeppelin/contracts/access/Ownable.sol";</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>The contract targets a Solidity compiler older than 0.8. Pre-0.8 compilers do not perform automatic arithmetic overflow/underflow checks and lack numerous compiler bug fixes and safety improvements introduced since.</p>
+
+        <div class="label">Impact</div>
+        <p>Arithmetic silently wraps on overflow/underflow unless a library like SafeMath is used consistently, and the contract remains exposed to known bugs fixed in newer compiler releases.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Upgrade the contract to a modern compiler, e.g. `pragma solidity 0.8.24;`, and re-test: 0.8+ reverts on arithmetic overflow/underflow by default.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F038: Outdated Solidity version <span class="badge low">Low</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/libs/MockCoin.sol:2</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>1 | // SPDX-License-Identifier: MIT
+> 2 | pragma solidity 0.6.12;
+  3 |
+  4 | import "@openzeppelin/contracts/token/ERC20/ERC20.sol";</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>The contract targets a Solidity compiler older than 0.8. Pre-0.8 compilers do not perform automatic arithmetic overflow/underflow checks and lack numerous compiler bug fixes and safety improvements introduced since.</p>
+
+        <div class="label">Impact</div>
+        <p>Arithmetic silently wraps on overflow/underflow unless a library like SafeMath is used consistently, and the contract remains exposed to known bugs fixed in newer compiler releases.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>Upgrade the contract to a modern compiler, e.g. `pragma solidity 0.8.24;`, and re-test: 0.8+ reverts on arithmetic overflow/underflow by default.</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F039: Unchecked send/transfer <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/SyrupBar.sol:31</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>29 | uint256 cakeBal = cake.balanceOf(address(this));
+  30 | if (_amount > cakeBal) {
+> 31 |     cake.transfer(_to, cakeBal);
+  32 | } else {
+  33 |     cake.transfer(_to, _amount);</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>`send()` and `transfer()` return a boolean indicating success. If you don't check this return value, the function may silently fail, leading to incorrect contract state.</p>
+
+        <div class="label">Impact</div>
+        <p>Failed transfers could leave the contract in an inconsistent state, possibly locking funds or allowing users to withdraw more than they should.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Always check the return value of low level calls and revert on failure.
+function withdraw(uint256 amount) external {
+    require(balances[msg.sender] >= amount, "Insufficient");
+    balances[msg.sender] -= amount; // effects before interaction
+    (bool ok, ) = msg.sender.call{value: amount}("");
+    require(ok, "Transfer failed");
+}
+
+// Or use OpenZeppelin Address.sendValue, which reverts on failure:
+// Address.sendValue(payable(msg.sender), amount);</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F040: Unchecked send/transfer <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/SyrupBar.sol:33</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>31 |         cake.transfer(_to, cakeBal);
+  32 |     } else {
+> 33 |         cake.transfer(_to, _amount);
+  34 |     }
+  35 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>`send()` and `transfer()` return a boolean indicating success. If you don't check this return value, the function may silently fail, leading to incorrect contract state.</p>
+
+        <div class="label">Impact</div>
+        <p>Failed transfers could leave the contract in an inconsistent state, possibly locking funds or allowing users to withdraw more than they should.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Always check the return value of low level calls and revert on failure.
+function withdraw(uint256 amount) external {
+    require(balances[msg.sender] >= amount, "Insufficient");
+    balances[msg.sender] -= amount; // effects before interaction
+    (bool ok, ) = msg.sender.call{value: amount}("");
+    require(ok, "Transfer failed");
+}
+
+// Or use OpenZeppelin Address.sendValue, which reverts on failure:
+// Address.sendValue(payable(msg.sender), amount);</code></pre>
+
+        
+    </div>
+    
+    <div class="finding">
+        <h3>F041: Unchecked send/transfer <span class="badge medium">Medium</span></h3>
+        <p><strong>Location:</strong> <span class="loc">demo/pancake-smart-contracts/projects/farms-pools/contracts/libs/WBNB.sol:29</span>
+        </p>
+
+        <div class="label">Vulnerable code</div>
+        <pre><code>27 |     require(balanceOf[msg.sender] >= wad);
+  28 |     balanceOf[msg.sender] -= wad;
+> 29 |     msg.sender.transfer(wad);
+  30 |     emit Withdrawal(msg.sender, wad);
+  31 | }</code></pre>
+
+        <div class="label">What is wrong</div>
+        <p>`send()` and `transfer()` return a boolean indicating success. If you don't check this return value, the function may silently fail, leading to incorrect contract state.</p>
+
+        <div class="label">Impact</div>
+        <p>Failed transfers could leave the contract in an inconsistent state, possibly locking funds or allowing users to withdraw more than they should.</p>
+
+        <div class="label">Recommended fix</div>
+        <pre><code>// Always check the return value of low level calls and revert on failure.
+function withdraw(uint256 amount) external {
+    require(balances[msg.sender] >= amount, "Insufficient");
+    balances[msg.sender] -= amount; // effects before interaction
+    (bool ok, ) = msg.sender.call{value: amount}("");
+    require(ok, "Transfer failed");
+}
+
+// Or use OpenZeppelin Address.sendValue, which reverts on failure:
+// Address.sendValue(payable(msg.sender), amount);</code></pre>
+
+        
+    </div>
+    
+
+    <h2>Simulation Metrics</h2>
+    <p><strong>Success Rate:</strong> N/A</p>
+    <p><strong>Total Exploits Attempted:</strong> 0</p>
+    
+
+    <h2>Additional Security Modules</h2>
+
+    <h3>Bytecode Verification</h3>
+    
+    <p>Not performed.</p>
+    
+
+    <h3>Dependency Vulnerabilities</h3>
+    
+    <p>No vulnerable dependencies found or scan not run.</p>
+    
+
+    <h3>Upgrade Safety</h3>
+    
+    <p>No upgrade safety issues detected.</p>
+    
+
+    <h3>Formal Verification</h3>
+    
+    <p>No formal verification issues found or not run.</p>
+    
+
+    <h3>Hawk-i Deep Agent Campaign</h3>
+    
+    <p>Deep agent not run.</p>
+    
+
+    <hr>
+    <p><em>Report generated by Hawk-i v1.0.0</em></p>
+</body>
+</html>

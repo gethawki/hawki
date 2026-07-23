@@ -153,3 +153,19 @@ cython_debug/
 hawki_reports/
 *.log
 *.jsonl
+# Vendored third-party demo corpora: kept LOCAL only (avoid repo bloat and
+# third-party licensing in-tree). Provenance is in each DEMO_SOURCE.md, and
+# hawki's own scan output (hawki_report/) plus the novel-run evidence are kept.
+demo/not-so-smart-contracts/*
+!demo/not-so-smart-contracts/DEMO_SOURCE.md
+!demo/not-so-smart-contracts/hawki_report
+demo/damn-vulnerable-defi/*
+!demo/damn-vulnerable-defi/DEMO_SOURCE.md
+!demo/damn-vulnerable-defi/hawki_report
+demo/pancake-smart-contracts/*
+!demo/pancake-smart-contracts/DEMO_SOURCE.md
+!demo/pancake-smart-contracts/hawki_report
+demo/DeFiVulnLabs/*
+!demo/DeFiVulnLabs/DEMO_SOURCE.md
+!demo/DeFiVulnLabs/hawki_report
+!demo/DeFiVulnLabs/deep_novel

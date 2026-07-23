@@ -1,6 +1,6 @@
 # Contributors ✨
 
-We are grateful to everyone who has contributed to Hawk‑i. This project would not be possible without your support, whether through code, documentation, bug reports, feature suggestions, or spreading the word.
+We are grateful to everyone who has contributed to Hawk-i. This project would not be possible without your support, whether through code, documentation, bug reports, feature suggestions, or spreading the word.
 
 ## How to Get Listed
 
@@ -27,6 +27,6 @@ Contribution types include: `code`, `doc`, `design`, `bug`, `review`, `test`, `i
 
 ---
 
-**Thank you for making Hawk‑i better!** 🦅
+**Thank you for making Hawk-i better!** 🦅
 
 *If you see your name missing, please let us know!*
