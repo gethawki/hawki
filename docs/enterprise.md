@@ -40,11 +40,11 @@ volumes:
   hawki_reports:
 ```
 
-The canonical published image is `0xsemantic/hawki`. Pull it directly instead of building if you prefer:
+The canonical published image is `levichinecherem/hawki`. Pull it directly instead of building if you prefer:
 
 ```bash
-docker pull 0xsemantic/hawki:latest
-docker run --rm --user $(id -u):$(id -g) -v $(pwd):/work -w /work 0xsemantic/hawki scan . --format html
+docker pull levichinecherem/hawki:latest
+docker run --rm --user $(id -u):$(id -g) -v $(pwd):/work -w /work levichinecherem/hawki scan . --format html
 ```
 
 ### Air-Gapped Environments

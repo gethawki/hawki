@@ -125,7 +125,7 @@
 
 ### 🔧 Improvements
 - PyPI package (`pip install hawki`).
-- Docker image (`docker pull 0xsemantic/hawki`).
+- Docker image (`docker pull levichinecherem/hawki`).
 - Demo suite of 30 intentionally vulnerable contracts.
 - Cross-platform compatibility (Linux, macOS, Windows).
 

@@ -5,7 +5,7 @@
 
 [![PyPI version](https://img.shields.io/pypi/v/hawki)](https://pypi.org/project/hawki/)
 [![PyPI - Downloads](https://img.shields.io/pypi/dw/hawki)](https://pypi.org/project/hawki/)
-[![Docker Pulls](https://img.shields.io/docker/pulls/0xsemantic/hawki)](https://hub.docker.com/r/0xsemantic/hawki)
+[![Docker Pulls](https://img.shields.io/docker/pulls/levichinecherem/hawki)](https://hub.docker.com/r/levichinecherem/hawki)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![Contributors](https://img.shields.io/github/contributors/gethawki/hawki)](https://github.com/gethawki/hawki/graphs/contributors)
@@ -102,11 +102,11 @@ Optional extras pull in report dependencies: `pip install "hawki[reports]"` (HTM
 
 **Option 2: Use Docker**
 ```bash
-docker pull 0xsemantic/hawki:latest
+docker pull levichinecherem/hawki:latest
 # Mount your project as the working directory and run as your own user so the
 # report (written to ./hawki_reports) lands back on the host with the right
 # ownership.
-docker run --rm --user $(id -u):$(id -g) -v $(pwd):/work -w /work 0xsemantic/hawki scan . --format html
+docker run --rm --user $(id -u):$(id -g) -v $(pwd):/work -w /work levichinecherem/hawki scan . --format html
 ```
 
 **Option 3: Install from source**
