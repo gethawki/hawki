@@ -6,18 +6,25 @@ Unit tests for static rules.
 """
 
 import unittest
+
 from hawki.core.static_rule_engine import RuleEngine
 from hawki.core.static_rule_engine.rules.reentrancy import ReentrancyRule
+
 
 class TestRules(unittest.TestCase):
     def test_reentrancy_rule(self):
         rule = ReentrancyRule()
-        contract_data = [{
-            "name": "Vault",
-            "functions": [
-                {"name": "withdraw", "state_mutability": "payable", "modifiers": []}
-            ]
-        }]
+        # Source-based detection: external .call before a state write, unguarded.
+        src = (
+            "contract Vault {\n"
+            "  mapping(address => uint) bal;\n"
+            "  function withdraw() public {\n"
+            "    (bool ok, ) = msg.sender.call{value: bal[msg.sender]}(\"\");\n"
+            "    bal[msg.sender] = 0;\n"
+            "  }\n"
+            "}"
+        )
+        contract_data = [{"path": "Vault.sol", "source": src}]
         findings = rule.run_check(contract_data)
         self.assertEqual(len(findings), 1)
         # Check fields set by the rule itself

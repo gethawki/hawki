@@ -3,8 +3,10 @@
 # --------------------
 import unittest
 from unittest.mock import MagicMock
-from hawki.core.ai_engine.reasoning_agent import ReasoningAgent
+
 from hawki.core.ai_engine.llm_orchestrator import LLMOrchestrator
+from hawki.core.ai_engine.reasoning_agent import ReasoningAgent
+
 
 class TestReasoningAgent(unittest.TestCase):
     def setUp(self):

@@ -3,6 +3,7 @@
 # --------------------
 from hawki.core.data_layer.reporting.scoring_engine import SecurityScoreEngine
 
+
 def test_no_findings():
     engine = SecurityScoreEngine()
     result = engine.calculate([])

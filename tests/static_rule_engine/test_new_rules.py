@@ -3,6 +3,7 @@
 # --------------------
 from hawki.core.static_rule_engine.rules.missing_initializer import MissingInitializerRule
 
+
 def test_detects_missing_initializer():
     rule = MissingInitializerRule()
     contract_data = [{

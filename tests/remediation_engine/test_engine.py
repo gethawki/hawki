@@ -1,9 +1,12 @@
 # --------------------
 # File: tests/core/remediation_engine/test_engine.py
 # --------------------
-import pytest
 import json
+
+import pytest
+
 from hawki.core.remediation_engine import RemediationEngine
+
 
 @pytest.fixture
 def templates_dir(tmp_path):

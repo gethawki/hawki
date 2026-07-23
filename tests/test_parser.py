@@ -5,11 +5,12 @@
 Unit tests for SolidityParser.
 """
 
+import tempfile
 import unittest
 from pathlib import Path
-import tempfile
 
 from hawki.core.repo_intelligence.parser import SolidityParser
+
 
 class TestParser(unittest.TestCase):
     def setUp(self):

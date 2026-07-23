@@ -2,9 +2,11 @@
 # File: tests/sandbox/test_sandbox_manager.py
 # --------------------
 import unittest
-from unittest.mock import patch
 from pathlib import Path
+from unittest.mock import patch
+
 from hawki.core.exploit_sandbox.sandbox_manager import SandboxManager
+
 
 class TestSandboxManager(unittest.TestCase):
     @patch("hawki.core.exploit_sandbox.sandbox_manager.DockerConfig")

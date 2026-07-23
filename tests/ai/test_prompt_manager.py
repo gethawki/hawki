@@ -1,11 +1,13 @@
 # --------------------
 # File: tests/ai/test_prompt_manager.py
 # --------------------
-import unittest
-import tempfile
 import json
+import tempfile
+import unittest
 from pathlib import Path
+
 from hawki.core.ai_engine.prompt_manager import PromptManager
+
 
 class TestPromptManager(unittest.TestCase):
     def setUp(self):

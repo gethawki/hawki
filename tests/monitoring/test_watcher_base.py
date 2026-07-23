@@ -2,7 +2,9 @@
 # File: tests/monitoring/test_watcher_base.py
 # --------------------
 import unittest
+
 from hawki.core.monitoring.watcher_base import Watcher
+
 
 class DummyWatcher(Watcher):
     def check(self):

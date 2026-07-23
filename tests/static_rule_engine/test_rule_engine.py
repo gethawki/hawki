@@ -2,8 +2,10 @@
 # File: tests/core/static_rule_engine/test_rule_engine.py
 # --------------------
 from unittest.mock import Mock
+
 from hawki.core.static_rule_engine import RuleEngine
 from hawki.core.static_rule_engine.rules import BaseRule
+
 
 class MockRule(BaseRule):
     severity = "High"

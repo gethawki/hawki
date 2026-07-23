@@ -1,10 +1,12 @@
 # --------------------
 # File: tests/monitoring/test_state_manager.py
 # --------------------
-import unittest
 import tempfile
+import unittest
 from pathlib import Path
+
 from hawki.core.monitoring.state_manager import StateManager
+
 
 class TestStateManager(unittest.TestCase):
     def setUp(self):
