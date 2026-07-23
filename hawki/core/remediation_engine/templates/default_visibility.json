@@ -1,0 +1,5 @@
+{
+  "explanation": "Before Solidity 0.5, a function with no visibility specifier silently defaulted to public, so helper functions the author meant to keep internal could be called by anyone. Solidity 0.5+ makes visibility mandatory, but legacy code compiled with older pragmas still carries this trap.",
+  "impact": "Anyone can call functions that were intended to be internal, such as initialization or fund-moving helpers; the 2017 Parity wallet hack started with an unprotected function that was public by default.",
+  "fix_snippet": "// Bad (pre-0.5): no specifier, defaults to public\n// function _setOwner(address newOwner) { owner = newOwner; }\n\n// Good: declare visibility explicitly on every function\nfunction _setOwner(address newOwner) internal {\n    owner = newOwner;\n}\n\nfunction withdraw(uint256 amount) external {\n    // external: callable only from outside the contract\n}\n\nfunction balanceOf(address account) public view returns (uint256) {\n    // public: callable externally and internally\n}\n\n// Also upgrade to Solidity 0.5+ (ideally a pinned 0.8.x), where the compiler\n// rejects functions without an explicit visibility specifier."
+}

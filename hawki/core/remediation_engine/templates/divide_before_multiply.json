@@ -1,0 +1,5 @@
+{
+  "explanation": "Performing integer division before multiplication (a / b * c) truncates the intermediate result, so precision is lost before the final value is computed. Solidity integer division always rounds toward zero, and any remainder discarded by the early division can never be recovered by the later multiplication.",
+  "impact": "Rewards, fees, or share calculations come out systematically too low (sometimes zero), letting an attacker exploit the rounding gap to underpay fees, extract value from vaults, or skew accounting in their favor.",
+  "fix_snippet": "// BAD: division first truncates before the multiply\n// uint256 reward = amount / totalSupply * rate;\n\n// GOOD: multiply first, then divide (watch for overflow of the product)\nuint256 reward = amount * rate / totalSupply;\n\n// BEST: use OpenZeppelin Math.mulDiv, which computes a * b / d\n// with full 512 bit intermediate precision and no overflow:\nimport {Math} from \"@openzeppelin/contracts/utils/math/Math.sol\";\n\nuint256 reward2 = Math.mulDiv(amount, rate, totalSupply);"
+}

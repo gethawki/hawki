@@ -1,0 +1,5 @@
+{
+  "explanation": "Casting a wider integer to a narrower type, such as uint32(x) on a uint256 value, silently truncates the high order bits instead of reverting. Solidity performs no runtime check on explicit downcasts, so any value larger than the target type's maximum wraps to a smaller, wrong number.",
+  "impact": "An attacker can supply a value that truncates to something favorable (for example a huge balance that becomes tiny, or a timestamp that wraps), corrupting accounting, bypassing caps, or unlocking funds early.",
+  "fix_snippet": "// BAD: silently truncates if x > type(uint32).max\n// uint32 small = uint32(x);\n\n// GOOD: OpenZeppelin SafeCast reverts on overflow\nimport {SafeCast} from \"@openzeppelin/contracts/utils/math/SafeCast.sol\";\n\nusing SafeCast for uint256;\n\nfunction store(uint256 x) external {\n    uint32 small = x.toUint32(); // reverts if x does not fit in 32 bits\n    packedValue = small;\n}\n\n// Alternative without a library: check the bound explicitly first\nrequire(x <= type(uint32).max, \"value exceeds uint32\");\nuint32 checked = uint32(x);"
+}

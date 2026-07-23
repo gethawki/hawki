@@ -1,0 +1,5 @@
+{
+  "explanation": "A floating pragma such as ^0.8.0 lets the contract compile with any compiler in that range, so the version used in production may differ from the one used during testing and audit. Different compiler releases can change optimizer behavior, code generation, and known-bug status, making the deployed bytecode unpredictable.",
+  "impact": "The contract may be deployed with an untested or buggy compiler version, silently introducing vulnerabilities that were absent from the audited build.",
+  "fix_snippet": "// Bad: any 0.8.x compiler is accepted\n// pragma solidity ^0.8.0;\n\n// Good: pin the exact compiler version that was tested and audited\npragma solidity 0.8.24;\n\n// Keep the pinned version in sync with your build config, e.g. in hardhat.config.js:\n// solidity: { version: \"0.8.24\" }\n// so every environment (dev, CI, deployment) compiles with the same compiler."
+}
